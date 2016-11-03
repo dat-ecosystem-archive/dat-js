@@ -1,0 +1,19 @@
+{
+  "name": "dat-api",
+  "version": "1.0.0",
+  "description": "a javascript dat api",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/karissa/dat-api.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/karissa/dat-api/issues"
+  },
+  "homepage": "https://github.com/karissa/dat-api#readme"
+}
