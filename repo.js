@@ -19,13 +19,12 @@ function Repo (key, opts) {
   this.drive = hyperdrive(this.db)
   this.archive = this.drive.createArchive(key, this.opts)
   this.key = this.archive.key
-  this.discoveryKey = this.archive.discoveryKey
   this._open(key)
 }
 
 inherits(Repo, events.EventEmitter)
 
-Repo.prototype._open= function () {
+Repo.prototype._open = function () {
   var self = this
   this.archive.open(function () {
     self.emit('ready')

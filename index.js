@@ -22,19 +22,10 @@ function Dat (opts) {
   this.swarm = swarm(defaults({
     hash: false,
     stream: function (info) {
-      var stream = drive.replicate()
-      if (info.channel) join(info.channel) // we already know the channel, join
-      else stream.once('open', function (key) {
-        console.log('joining', key)
-        join(key)
-      }) // wait for the remote to tell us
-      return stream
-
-      function join (key) {
-        var archive = self.get({key: key})
-        if (archive) archive.replicate({stream: stream})
-        else console.error('archive not found', key)
-      }
+      var archive = self.get(info.channel)
+      console.log('archive', info.channel)
+      if (archive) return archive.replicate()
+      else console.error('archive not found', key)
     }
   }))
 
@@ -120,6 +111,7 @@ Dat.prototype.watch = function (dir, repo, opts) {
     resume: opts.resume || self.opts.resume,
     ignore: opts.ignore || self.opts.ignore
   }, cb)
+  return this.importer
 }
 
 /**

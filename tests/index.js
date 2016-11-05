@@ -12,7 +12,6 @@ test('create a dat in memory', function (t) {
     t.ok(repo.key, 'repo ready and has a key')
     t.equals(repo.key.length, 32, 'has key with proper length')
     t.equals(repo.archive.key, repo.key, 'key is the archive key')
-    t.equals(repo.discoverykey && repo.discoveryKey.length, 32, 'discovery key is there')
     dat.add(repo.key, function (other) {
       t.ok(repo, 'other repo ready')
       t.equals(other.key, repo.key, 'keys match')
