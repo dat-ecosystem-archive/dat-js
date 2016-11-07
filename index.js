@@ -2,7 +2,6 @@ var inherits = require('util').inherits
 var events = require('events')
 var swarm = require('discovery-swarm')
 var defaults = require('datland-swarm-defaults')
-var hyperImport = require('hyperdrive-import-files')
 
 var Repo = require('./repo')
 
@@ -20,11 +19,13 @@ function Dat (opts) {
   this.opts = opts || {}
   this.repos = []
   this.swarm = swarm(defaults({
-    hash: false,
     stream: function (info) {
-      var archive = self.get(info.channel)
-      console.log('archive', info.channel)
-      if (archive) return archive.replicate()
+      console.log('archive', arguments)
+      var archive = self.get(info)
+      if (archive) return archive.replicate({
+        uploading: self.uploading,
+        downloading: self.downloading
+      })
       else console.error('archive not found', key)
     }
   }))
@@ -44,7 +45,8 @@ inherits(Dat, events.EventEmitter)
  * @return {Repo|undefined}  The repo object with the corresponding key.
  */
 Dat.prototype.get = function (key) {
-  return repos.filter(function () {
+  console.log('getting', key)
+  return this.repos.filter(function () {
     return key.toString('hex') === repo.key.toString('hex')
   })[0]
 }
@@ -87,6 +89,7 @@ Dat.prototype.add = function (key, opts, cb) {
  * @param  {Repo}   repo
  */
 Dat.prototype.join = function (repo) {
+  console.log('joining', repo.archive.discoveryKey)
   this.swarm.join(repo.archive.discoveryKey)
 }
 
@@ -96,22 +99,6 @@ Dat.prototype.join = function (repo) {
  */
 Dat.prototype.leave = function (repo) {
   this.swarm.leave(repo.archive.discoveryKey)
-}
-
-/**
- * Begins watching a given directory and adds the files to the
- * repository as files are added, modified, or deleted.
- * @param  {string}   dir   The dir to begin watching.
- * @param  {Repo}     repo  The repo to add it to.
- */
-Dat.prototype.watch = function (dir, repo, opts) {
-  var self = this
-  this.importer = hyperImport(repo.archive, dir, {
-    live: opts.live || self.opts.live,
-    resume: opts.resume || self.opts.resume,
-    ignore: opts.ignore || self.opts.ignore
-  }, cb)
-  return this.importer
 }
 
 /**

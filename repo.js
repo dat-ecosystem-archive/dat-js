@@ -17,6 +17,7 @@ function Repo (key, opts) {
   this.opts = opts || {}
   this.db = this.opts.db || memdb()
   this.drive = hyperdrive(this.db)
+  console.log('key', key)
   this.archive = this.drive.createArchive(key, this.opts)
   this.key = this.archive.key
   this._open(key)
