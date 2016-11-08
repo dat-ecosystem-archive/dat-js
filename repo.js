@@ -1,5 +1,6 @@
 var inherits = require('util').inherits
 var events = require('events')
+var swarm = require('hyperdrive-archive-swarm')
 var hyperdrive = require('hyperdrive')
 var memdb = require('memdb')
 
@@ -17,9 +18,10 @@ function Repo (key, opts) {
   this.opts = opts || {}
   this.db = this.opts.db || memdb()
   this.drive = hyperdrive(this.db)
-  console.log('key', key)
   this.archive = this.drive.createArchive(key, this.opts)
   this.key = this.archive.key
+  this.swarm = swarm(this.archive)
+  self.join()
   this._open(key)
 }
 
@@ -32,11 +34,32 @@ Repo.prototype._open = function () {
   })
 }
 
-Repo.prototype.close = function (cb) {
+/**
+ * Joins the swarm for the given repo.
+ * @param  {Repo}   repo
+ */
+Repo.prototype.join =
+Repo.prototype.resume = function () {
+  this.swarm.join(this.archive.discoveryKey)
+}
+
+/**
+ * Leaves the swarm for the given repo.
+ * @param  {Repo}   repo
+ */
+Repo.prototype.leave =
+Repo.prototype.pause = function () {
+  this.swarm.leave(this.archive.discoveryKey)
+}
+
+Repo.prototype.destroy =
+Repo.prototype.close = function () {
   var self = this
-  self.archive.close(function () {
-    self.db.close(function () {
-      self.emit('close')
+  self.swarm.destroy(function () {
+    self.archive.close(function () {
+      self.db.close(function () {
+        self.emit('close')
+      })
     })
   })
 }
