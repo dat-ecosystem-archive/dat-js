@@ -15,23 +15,11 @@ Adds a new dat at the given path on the filesystem. Creates a `.dat` folder that
 
 Watches the repository and adds/updates/deletes new files in the default/recommended way.
 
-#### dat.join(repo)
-
-Joins the swarm in the default/recommended way.
-
-#### dat.leave(repo)
-
-Leaves the swarm.
-
 #### dat.remove(repo)
 
 Removes the repo from the dat object. Does this delete the files, too? OR just deletes the .dat folder?
 
 ### Properties
-
-#### dat.swarm
-
-The swarm instance(s).
 
 #### dat.repos
 
@@ -49,13 +37,17 @@ The key of the repo
 
 The private key of the repo. Used for granting write access.
 
-#### repo.pause()
-
-Pause syncing.
-
 #### repo.resume()
 
-Resume syncing.
+Joins the swarm for the repository, beginning to find peers in the network to share with.
+
+#### repo.pause()
+
+Pause syncing. This disconnects from any peers currently syncing data with the repo.
+
+#### repo.swarm
+
+Get to the original `hyperdrive-archive-swarm` instance, where the swarm can be managed.
 
 #### repo.archive
 
@@ -66,3 +58,5 @@ Get to the original `hyperdrive archive` instance, where files can be managed us
 #### dat.on('repo')
 
 Fired every time a new repo is ready.
+
+#### dat.on('close')
