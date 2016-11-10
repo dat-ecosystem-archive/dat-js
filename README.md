@@ -41,6 +41,10 @@ Joins the swarm for the repository, beginning to find peers in the network to sh
 
 Pause syncing. This disconnects from any peers currently syncing data with the repo.
 
+#### repo.destroy()
+
+Destroys the swarm and underlying database.
+
 #### repo.swarm
 
 Get to the original `hyperdrive-archive-swarm` instance, where the swarm can be managed.
