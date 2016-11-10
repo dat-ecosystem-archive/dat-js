@@ -1,7 +1,6 @@
 var Repo = require('../repo')
 var Dat = require('..')
 var test = require('tape')
-var log = require('why-is-node-running')
 
 test('create a dat in memory', function (t) {
   t.plan(7)
