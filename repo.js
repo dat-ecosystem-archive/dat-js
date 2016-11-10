@@ -20,6 +20,7 @@ function Repo (key, opts) {
   this.drive = hyperdrive(this.db)
   this.archive = this.drive.createArchive(key, this.opts)
   this.key = this.archive.key
+  this.privateKey = this.archive.privateKey
   this.swarm = swarm(this.archive)
   self.join()
   this._open(key)

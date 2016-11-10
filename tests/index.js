@@ -30,14 +30,23 @@ test('replicate a dat in memory', function (t) {
   var clone = new Dat()
 
   t.equals(dat.repos.length, 0, 'has zero repos before adding')
+  t.equals(clone.repos.length, 0, 'has zero repos before adding in clone')
+
   dat.add(null, function (repo) {
     t.equals(dat.repos.length, 1, 'has one repo after adding')
-    t.equals(clone.repos.length, 0, 'has zero repos before adding in clone')
     clone.add(repo.key, function (other) {
       t.equals(repo.key, other.key, 'keys match')
-      t.equals(clone.repos.length, 1, 'has one repo in clone')
-      clone.close()
-      dat.close()
+      t.equals(clone.repos.length, 1, 'clone has one repo after adding')
+      var writer = repo.archive.createFileWriteStream('hello.txt')
+      writer.write('world')
+      writer.end(function () {
+        other.archive.content.get(0, function () {
+          // force the updating of content
+          t.equals(repo.archive.content.bytes, other.archive.content.bytes, 'have same size')
+        })
+        clone.close()
+        dat.close()
+      })
     })
   })
   dat.on('close', function () {

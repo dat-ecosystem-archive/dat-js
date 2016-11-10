@@ -1,5 +1,9 @@
 # dat-api
 
+A pure JavaScript browser-friendly api for using dat.
+
+[![Travis](https://api.travis-ci.org/karissa/dat-api.svg)](https://travis-ci.org/karissa/dat-api) | [![NPM version](https://img.shields.io/npm/v/dat-api.svg?style=flat-square)](https://npmjs.org/package/dat)
+
 ## API
 
 #### var dat = new Dat(opts)
@@ -10,14 +14,6 @@ Adds a new dat at the given path on the filesystem. Creates a `.dat` folder that
 
  * `path`: the path on the filesystem to store data
  * The `onrepo` function will be called when the dat is finished being created.
-
-#### dat.watch(repo)
-
-Watches the repository and adds/updates/deletes new files in the default/recommended way.
-
-#### dat.remove(repo)
-
-Removes the repo from the dat object. Does this delete the files, too? OR just deletes the .dat folder?
 
 ### Properties
 
