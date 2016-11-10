@@ -4,7 +4,7 @@
   "description": "a javascript dat api",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node tests"
   },
   "repository": {
     "type": "git",
