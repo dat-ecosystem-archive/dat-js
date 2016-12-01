@@ -29,34 +29,32 @@ The repo object managed by dat.
 
 The key of the repo
 
-#### repo.privateKey
-
-The private key of the repo. Used for granting write access.
-
-#### repo.resume()
+#### `repo.resume()`
 
 Joins the swarm for the repository, beginning to find peers in the network to share with.
 
-#### repo.pause()
+#### `repo.pause()`
 
 Pause syncing. This disconnects from any peers currently syncing data with the repo.
 
-#### repo.destroy()
+#### `repo.destroy()`
 
 Destroys the swarm and underlying database.
 
-#### repo.swarm
+#### `repo.swarm`
 
-Get to the original `hyperdrive-archive-swarm` instance, where the swarm can be managed.
+Get to the original `discovery-swarm` instance, where the swarm can be managed.
 
-#### repo.archive
+#### `repo.archive`
 
 Get to the original `hyperdrive archive` instance, where files can be managed using that api.
 
 ### Events
 
-#### dat.on('repo')
+#### `repo`
 
 Fired every time a new repo is ready.
 
-#### dat.on('close')
+#### `close`
+
+Fired when dat is finished closing, including swarm and database.

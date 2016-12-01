@@ -1,6 +1,6 @@
 var inherits = require('util').inherits
 var events = require('events')
-var swarm = require('hyperdrive-archive-swarm')
+var swarm = require('hyperdiscovery')
 var hyperdrive = require('hyperdrive')
 var memdb = require('memdb')
 
