@@ -2,7 +2,7 @@
 
 A pure JavaScript browser-friendly api for using dat.
 
-[![Travis](https://api.travis-ci.org/karissa/dat-api.svg)](https://travis-ci.org/karissa/dat-api) | [![NPM version](https://img.shields.io/npm/v/dat-api.svg?style=flat-square)](https://npmjs.org/package/dat)
+[![Travis](https://api.travis-ci.org/karissa/dat-api.svg)](https://travis-ci.org/karissa/dat-api)  [![NPM version](https://img.shields.io/npm/v/dat-api.svg?style=flat-square)](https://npmjs.org/package/dat)
 
 ## API
 
