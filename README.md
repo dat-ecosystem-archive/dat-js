@@ -13,7 +13,7 @@ A pure JavaScript browser-friendly api for using dat.
 Adds a new dat with the given key. Joins the appropriate swarm for that key and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
 
  * `key`: the path on the filesystem to store data
- * `options`: any options you can pass to [mafintosh/hyperdrive](mafintosh/hyperdrive) or [karissa/hyperdiscovery](karissa/hyperdiscovery)
+ * `options`: any options you can pass to [mafintosh/hyperdrive](github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](github.com/karissa/hyperdiscovery)
 
 ### Properties
 
