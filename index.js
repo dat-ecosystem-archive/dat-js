@@ -1,4 +1,5 @@
 var inherits = require('util').inherits
+var xtend = require('xtend')
 var events = require('events')
 
 var Repo = require('./repo')
@@ -46,7 +47,7 @@ Dat.prototype.add = function (key, opts, cb) {
   if (typeof key === 'function') return self.add(null, null, key)
   if (!opts) opts = {}
 
-  var repo = new Repo(key, opts)
+  var repo = new Repo(key, xtend(this.opts, opts))
   self.repos.push(repo)
 
   repo.once('ready', onready)

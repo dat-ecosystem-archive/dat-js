@@ -6,14 +6,18 @@ A pure JavaScript browser-friendly api for using dat.
 
 ## API
 
-#### var dat = new Dat(opts)
+#### `var dat = new Dat([options])`
+
+Creates a new dat object. The options passed here will be default for any dats created using the `add` method.
+
+ * `options`: any options you can pass to [mafintosh/hyperdrive](github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](github.com/karissa/hyperdiscovery). These options will become default for all dats.
 
 #### `dat.add(key, [options], [onrepo])`
 
 Adds a new dat with the given key. Joins the appropriate swarm for that key and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
 
  * `key`: the path on the filesystem to store data
- * `options`: any options you can pass to [mafintosh/hyperdrive](github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](github.com/karissa/hyperdiscovery)
+ * `options`: These options will override any options given in the Dat constructor.
 
 ### Properties
 
