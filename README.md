@@ -8,16 +8,16 @@ A pure JavaScript browser-friendly api for using dat.
 
 #### var dat = new Dat(opts)
 
-#### dat.add(path, opts, onrepo)
+#### `dat.add(key, [options], [onrepo])`
 
-Adds a new dat at the given path on the filesystem. Creates a `.dat` folder that manages the state of the dat.
+Adds a new dat with the given key. Joins the appropriate swarm for that key and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
 
- * `path`: the path on the filesystem to store data
- * The `onrepo` function will be called when the dat is finished being created.
+ * `key`: the path on the filesystem to store data
+ * `options`: any options you can pass to hyperdrive or hyperdiscovery
 
 ### Properties
 
-#### dat.repos
+#### `dat.repos`
 
 Array of repo instances
 
@@ -25,7 +25,7 @@ Array of repo instances
 
 The repo object managed by dat.
 
-#### repo.key
+#### `repo.key`
 
 The key of the repo
 
