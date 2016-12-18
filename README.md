@@ -10,7 +10,7 @@ A pure JavaScript browser-friendly api for using dat.
 
 Creates a new dat object. The options passed here will be default for any dats created using the `add` method.
 
- * `options`: any options you can pass to [mafintosh/hyperdrive](github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](github.com/karissa/hyperdiscovery). These options will become default for all dats.
+ * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](https://github.com/karissa/hyperdiscovery). These options will become default for all dats.
 
 #### `dat.add(key, [options], [onrepo])`
 
