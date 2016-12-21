@@ -16,7 +16,6 @@ Creates a new dat object. The options passed here will be default for any dats c
 
 Adds a new dat with the given key. Joins the appropriate swarm for that key and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
 
- * `key`: the path on the filesystem to store data
  * `options`: These options will override any options given in the Dat constructor.
 
 ### Properties
