@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+ssh://git@github.com/karissa/dat-js.git"
   },
-  "author": "",
+  "author": "Karissa McKelvey <karissa@datproject.org>",
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/karissa/dat-js/issues"
