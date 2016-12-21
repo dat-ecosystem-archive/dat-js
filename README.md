@@ -1,8 +1,11 @@
-# dat-api
+# dat-js
 
 A pure JavaScript browser-friendly api for using dat.
 
-[![Travis](https://api.travis-ci.org/karissa/dat-api.svg)](https://travis-ci.org/karissa/dat-api)  [![NPM version](https://img.shields.io/npm/v/dat-api.svg?style=flat-square)](https://npmjs.org/package/dat)
+[![Travis](https://api.travis-ci.org/karissa/dat-js.svg)](https://travis-ci.org/karissa/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
+
+For a Node.js api for working with dats on the filesystem, use
+[dat-node](http://github.com/datproject/dat-node)
 
 ## API
 
@@ -10,7 +13,7 @@ A pure JavaScript browser-friendly api for using dat.
 
 Creates a new dat object. The options passed here will be default for any dats created using the `add` method.
 
- * `options`: any options you can pass to [mafintosh/hyperdrive](github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](github.com/karissa/hyperdiscovery). These options will become default for all dats.
+ * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](https://github.com/karissa/hyperdiscovery). These options will become default for all dats.
 
 #### `dat.add(key, [options], [onrepo])`
 

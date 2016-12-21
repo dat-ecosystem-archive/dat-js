@@ -1,21 +1,21 @@
 {
-  "name": "dat-api",
-  "version": "1.1.2",
-  "description": "a javascript dat api",
+  "name": "dat-js",
+  "version": "5.0.0",
+  "description": "A pure javascript dat api",
   "main": "index.js",
   "scripts": {
     "test": "node tests"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/karissa/dat-api.git"
+    "url": "git+ssh://git@github.com/karissa/dat-js.git"
   },
   "author": "",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/karissa/dat-api/issues"
+    "url": "https://github.com/karissa/dat-js/issues"
   },
-  "homepage": "https://github.com/karissa/dat-api#readme",
+  "homepage": "https://github.com/karissa/dat-js#readme",
   "dependencies": {
     "hyperdiscovery": "^1.0.1",
     "hyperdrive": "^7.7.1",
