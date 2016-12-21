@@ -1,11 +1,15 @@
-# dat-js
+# dat-js [![Travis](https://api.travis-ci.org/karissa/dat-js.svg)](https://travis-ci.org/karissa/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
 
 A pure JavaScript browser-friendly api for using dat.
 
-[![Travis](https://api.travis-ci.org/karissa/dat-js.svg)](https://travis-ci.org/karissa/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
+[Dat](http://datproject.org) is a decentralized tool for distributing data and files, built for scientific and research data. **dat-node** is a module to help you build node applications using Dat on the *file system*. For a Node.js api for working with dats on the filesystem, see [dat-node](http://github.com/datproject/dat-node).
 
-For a Node.js api for working with dats on the filesystem, use
-[dat-node](http://github.com/datproject/dat-node)
+Want to use Dat in the command line or an app (not build applications)? Check out:
+
+* [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
+* [Dat-Desktop](https://github.com/datproject/dat-desktop): A desktop application for Dat
+
+#### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions) ([#dat on IRC](http://webchat.freenode.net/?channels=dat))
 
 ## API
 
