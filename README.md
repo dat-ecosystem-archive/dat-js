@@ -1,4 +1,4 @@
-# dat-js [![Travis](https://api.travis-ci.org/karissa/dat-js.svg)](https://travis-ci.org/karissa/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
+# dat-js [![Travis](https://api.travis-ci.org/datproject/dat-js.svg)](https://travis-ci.org/datproject/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
 
 A pure JavaScript browser-friendly api for using dat.
 
