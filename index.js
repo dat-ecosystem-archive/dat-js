@@ -28,7 +28,7 @@ inherits(Dat, events.EventEmitter)
  * @return {Repo|undefined}  The repo object with the corresponding key.
  */
 Dat.prototype.get = function (key) {
-  return this.repos.filter(function () {
+  return this.repos.filter(function (repo) {
     return key.toString('hex') === repo.key.toString('hex')
   })[0]
 }

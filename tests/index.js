@@ -25,7 +25,7 @@ test('create a dat in memory', function (t) {
 })
 
 test('replicate a dat in memory', function (t) {
-  t.plan(5)
+  t.plan(6)
   var dat = new Dat()
   var clone = new Dat()
 
@@ -34,6 +34,8 @@ test('replicate a dat in memory', function (t) {
 
   dat.add(null, function (repo) {
     t.equals(dat.repos.length, 1, 'has one repo after adding')
+    var therepo = dat.get(repo.key)
+    t.equals(therepo.key, repo.key, 'get works')
     clone.add(repo.key, function (other) {
       t.equals(repo.key, other.key, 'keys match')
       t.equals(clone.repos.length, 1, 'clone has one repo after adding')
