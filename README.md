@@ -31,7 +31,6 @@ dat.add('ARCHIVE_KEY', function (repo) {
 var Dat = require('dat-js')
 
 var dat = Dat()
-var clone = Dat()
 dat.add(function (repo) {
   console.log('dat key is:', repo.key)
   var writer = repo.archive.createFileWriteStream('hello.txt')
@@ -40,6 +39,7 @@ dat.add(function (repo) {
 })
 
 function replicate (key) {
+  var clone = Dat()
   clone.add(key, function (repo) {
     var readStream = repo.archive.createFileReadStream('hello.txt')
     readStream.on('data', function (data) {
