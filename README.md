@@ -20,7 +20,7 @@ var Dat = require('dat-js')
 
 var dat = Dat()
 dat.add('ARCHIVE_KEY', function (repo) {
-  var readStream = repo.archive.createReadFileStream('hello.txt')
+  var readStream = repo.archive.createFileReadStream('hello.txt')
   readStream.pipe(process.stdout)
 })
 ```
