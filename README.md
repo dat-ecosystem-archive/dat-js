@@ -41,7 +41,7 @@ dat.add(function (repo) {
 
 function replicate (key) {
   clone.add(key, function (repo) {
-    var readStream = repo.archive.createReadFileStream('hello.txt')
+    var readStream = repo.archive.createFileReadStream('hello.txt')
     readStream.on('data', function (data) {
       console.log(data.toString()) // prints 'world'
     })
