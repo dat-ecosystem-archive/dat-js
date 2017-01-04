@@ -11,6 +11,44 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 #### Learn more! [docs.datproject.org](http://docs.datproject.org/) or [chat with us](https://gitter.im/datproject/discussions) ([#dat on IRC](http://webchat.freenode.net/?channels=dat))
 
+## Example
+
+#### Getting data from a remote dat
+
+```js
+var Dat = require('dat-js)
+
+var dat = Dat()
+dat.add('ARCHIVE_KEY', function (repo) {
+  var readStream = repo.archive.createReadFileStream('hello.txt')
+  readStream.pipe(process.stdout)
+})
+```
+
+#### Replicating a dat in memory
+
+```js
+var Dat = require('dat-js)
+
+var dat = Dat()
+var clone = Dat()
+dat.add(function (repo) {
+  console.log('dat key is:', repo.key)
+  var writer = repo.archive.createFileWriteStream('hello.txt')
+  writer.write('world')
+  writer.end(function () { replicate(key) })
+})
+
+function replicate (key) {
+  clone.add(key, function (repo) {
+    var readStream = repo.archive.createReadFileStream('hello.txt')
+    readStream.on('data', function (data) {
+      console.log(data.toString()) // prints 'world'
+    })
+  })
+}
+```
+
 ## API
 
 #### `var dat = new Dat([options])`
