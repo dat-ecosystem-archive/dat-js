@@ -36,7 +36,7 @@ dat.add(function (repo) {
   console.log('dat key is:', repo.key)
   var writer = repo.archive.createFileWriteStream('hello.txt')
   writer.write('world')
-  writer.end(function () { replicate(key) })
+  writer.end(function () { replicate(repo.key) })
 })
 
 function replicate (key) {
