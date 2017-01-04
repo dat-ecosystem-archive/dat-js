@@ -16,7 +16,7 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 #### Getting data from a remote dat
 
 ```js
-var Dat = require('dat-js)
+var Dat = require('dat-js')
 
 var dat = Dat()
 dat.add('ARCHIVE_KEY', function (repo) {
@@ -28,7 +28,7 @@ dat.add('ARCHIVE_KEY', function (repo) {
 #### Replicating a dat in memory
 
 ```js
-var Dat = require('dat-js)
+var Dat = require('dat-js')
 
 var dat = Dat()
 var clone = Dat()
