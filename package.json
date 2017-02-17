@@ -4,7 +4,7 @@
   "description": "A pure javascript dat api",
   "main": "index.js",
   "scripts": {
-    "test": "zuul --local -- tests/index.js"
+    "test-local": "zuul --local -- tests/index.js"
   },
   "repository": {
     "type": "git",
