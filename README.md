@@ -2,7 +2,7 @@
 
 A pure JavaScript browser-friendly api for using dat.
 
-[Dat](http://datproject.org) is a decentralized tool for distributing data and files, built for scientific and research data. **dat-node** is a module to help you build node applications using Dat on the *file system*. For a Node.js api for working with dats on the filesystem, see [dat-node](http://github.com/datproject/dat-node).
+[Dat](http://datproject.org) is a powerful decentralized data sharing tool. For a Node.js api for working with dats on the filesystem, see [dat-node](http://github.com/datproject/dat-node).
 
 Want to use Dat in the command line or an app (not build applications)? Check out:
 
@@ -55,7 +55,7 @@ function replicate (key) {
 
 Creates a new dat object. The options passed here will be default for any dats created using the `add` method.
 
- * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive) or [karissa/hyperdiscovery](https://github.com/karissa/hyperdiscovery). These options will become default for all dats.
+ * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats.
 
 #### `dat.add(key, [options], [onrepo])`
 
@@ -77,25 +77,17 @@ The repo object managed by dat.
 
 The key of the repo
 
-#### `repo.resume()`
-
-Joins the swarm for the repository, beginning to find peers in the network to share with.
-
-#### `repo.pause()`
-
-Pause syncing. This disconnects from any peers currently syncing data with the repo.
-
 #### `repo.destroy()`
 
 Destroys the swarm and underlying database.
 
 #### `repo.swarm`
 
-Get to the original `discovery-swarm` instance, where the swarm can be managed.
+Get to the original `webrtc-swarm` instance, where the swarm can be managed.
 
 #### `repo.archive`
 
-Get to the original `hyperdrive archive` instance, where files can be managed using that api.
+Get to the original `hyperdrive` archive instance, where files can be managed using that api.
 
 ### Events
 

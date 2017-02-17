@@ -1,6 +1,8 @@
 var inherits = require('util').inherits
+var pump = require('pump')
 var events = require('events')
-var swarm = require('hyperdiscovery')
+var swarm = require('webrtc-swarm')
+var Signalhub = require('signalhub')
 var hyperdrive = require('hyperdrive')
 var memdb = require('memdb')
 
@@ -19,9 +21,10 @@ function Repo (key, opts) {
   this.db = this.opts.db || memdb()
   this.drive = hyperdrive(this.db)
   this.archive = this.drive.createArchive(key, this.opts)
-  this.key = this.archive.key
+  this.key = this.archive.key.toString('hex')
   this.privateKey = this.archive.privateKey
-  this.swarm = this.swarm || swarm(this.archive, this.opts)
+  var signalhub = Signalhub('dat-' + this.archive.key.toString('hex'), opts.signalhub || 'https://signalhub.mafintosh.com')
+  this.swarm = this.swarm || swarm(signalhub)
   self.join()
   this._open(key)
 }
@@ -41,7 +44,19 @@ Repo.prototype._open = function () {
  */
 Repo.prototype.join =
 Repo.prototype.resume = function () {
-  this.swarm.join(this.archive.discoveryKey)
+  this.swarm.on('peer', this._replicate.bind(this))
+}
+
+/**
+ * Internal function for replicating the archive to the swarm
+ * @param  {[type]} peer A webrtc-swarm peer
+ */
+Repo.prototype._replicate = function (conn) {
+  var peer = this.archive.replicate({
+    upload: true,
+    download: true
+  })
+  pump(conn, peer, conn)
 }
 
 /**
@@ -50,13 +65,13 @@ Repo.prototype.resume = function () {
  */
 Repo.prototype.leave =
 Repo.prototype.pause = function () {
-  this.swarm.leave(this.archive.discoveryKey)
+  this.swarm.removeListener('peer', this._replicate)
 }
 
 Repo.prototype.destroy =
 Repo.prototype.close = function () {
   var self = this
-  self.swarm.destroy(function () {
+  self.swarm.close(function () {
     self.archive.close(function () {
       self.db.close(function () {
         self.emit('close')
