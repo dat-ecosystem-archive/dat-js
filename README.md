@@ -17,11 +17,14 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 ```js
 var Dat = require('dat-js')
+var concat = require('concat-stream')
 
 var dat = Dat()
 dat.add('ARCHIVE_KEY', function (repo) {
   var readStream = repo.archive.createFileReadStream('hello.txt')
-  readStream.pipe(process.stdout)
+  concat(readStream, function (data) {
+    console.log(data)
+  })
 })
 ```
 
