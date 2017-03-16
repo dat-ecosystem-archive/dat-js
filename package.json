@@ -4,7 +4,8 @@
   "description": "A pure javascript dat api",
   "main": "index.js",
   "scripts": {
-    "test-local": "zuul --local -- tests/index.js"
+    "test-local": "zuul --local -- tests/index.js",
+    "build": "browserify -s Dat -e ./ | uglifyjs -c warnings=false -m > dat.min.js"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,9 @@
     "xtend": "^4.0.1"
   },
   "devDependencies": {
+    "browserify": "^14.1.0",
     "tape": "^4.6.3",
+    "uglifyjs": "^2.4.10",
     "zuul": "^3.11.1"
   },
   "keywords": [
