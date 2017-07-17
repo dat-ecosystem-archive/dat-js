@@ -21,11 +21,16 @@ test('replicate a dat', function (t) {
       t.end()
     } else {
       console.log('reading from dat')
-      repo.archive.content.get(0, function () {
-        // force the updating of content
+      t.equals(repo.archive.key.toString('hex'), key)
+      repo.swarm.on('peer', function (conn) {
+        t.ok(conn, 'got a peer')
+      })
+      repo.archive.on('syncing', function () {
+        t.ok('syncing', 'syncing')
+      })
+      repo.archive.on('sync', function () {
         t.equals(repo.archive.content.bytes, 5, 'have same size')
         t.end()
-
       })
     }
   })
