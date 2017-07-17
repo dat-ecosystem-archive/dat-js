@@ -4,7 +4,7 @@ var events = require('events')
 var swarm = require('webrtc-swarm')
 var Signalhub = require('signalhub')
 var hyperdrive = require('hyperdrive')
-var memdb = require('memdb')
+var ram = require('random-access-memory')
 
 module.exports = Repo
 
@@ -18,14 +18,8 @@ function Repo (key, opts) {
   var self = this
   events.EventEmitter.call(this)
   this.opts = opts || {}
-  this.db = this.opts.db || memdb()
-  this.drive = hyperdrive(this.db)
-  this.archive = this.drive.createArchive(key, this.opts)
-  this.key = this.archive.key.toString('hex')
-  this.privateKey = this.archive.privateKey
-  var signalhub = Signalhub('dat-' + this.archive.key.toString('hex'), opts.signalhub || 'https://signalhub.mafintosh.com')
-  this.swarm = this.swarm || swarm(signalhub)
-  self.join()
+  this.db = this.opts.db || ram
+  this.archive = hyperdrive(this.db, key, opts)
   this._open(key)
 }
 
@@ -33,7 +27,11 @@ inherits(Repo, events.EventEmitter)
 
 Repo.prototype._open = function () {
   var self = this
-  this.archive.open(function () {
+  this.archive.ready(function () {
+    var signalhub = Signalhub('dat-' + self.archive.key.toString('hex'), self.opts.signalhub || 'https://signalhub.mafintosh.com')
+    self.key = self.archive.key.toString('hex')
+    self.swarm = self.swarm || swarm(signalhub)
+    self.join()
     self.emit('ready')
   })
 }
@@ -73,9 +71,7 @@ Repo.prototype.close = function () {
   var self = this
   self.swarm.close(function () {
     self.archive.close(function () {
-      self.db.close(function () {
-        self.emit('close')
-      })
+      self.emit('close')
     })
   })
 }
