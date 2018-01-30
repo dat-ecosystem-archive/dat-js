@@ -4,6 +4,8 @@ A pure JavaScript browser-friendly api for using dat.
 
 [Dat](http://datproject.org) is a powerful decentralized data sharing tool. For a Node.js api for working with dats on the filesystem, see [dat-node](http://github.com/datproject/dat-node).
 
+**Note**: Because dat-js uses webrtc, it can only connect to other browser clients. It is not possible for the dat-js library to connect to the UTP and UDP clients used in the Node.js versions.
+
 Want to use Dat in the command line or an app (not build applications)? Check out:
 
 * [Dat CLI](https://github.com/datproject/dat): Use Dat in the command line
