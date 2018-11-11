@@ -1,7 +1,6 @@
 var inherits = require('util').inherits
-var pump = require('pump')
 var events = require('events')
-var swarm = require('webrtc-swarm')
+var WebrtcSwarm = require('@geut/discovery-swarm-webrtc')
 var Signalhub = require('signalhub')
 var hyperdrive = require('hyperdrive')
 var ram = require('random-access-memory')
@@ -10,60 +9,41 @@ module.exports = Repo
 
 /**
  * A dat repository is a hyperdrive with some default settings.
- * @param {string} key    The key
+ * @param {string} url    The url
  * @param {Object} opts   Options to use in the archive instance
  */
-function Repo (key, opts) {
-  if (!(this instanceof Repo)) return new Repo(key, opts)
-  var self = this
+function Repo (url, opts) {
+  if (!(this instanceof Repo)) return new Repo(url, opts)
   events.EventEmitter.call(this)
+  this.url = url
   this.opts = opts || {}
   this.db = this.opts.db || ram
-  this.archive = hyperdrive(this.db, key, opts)
-  this._open(key)
+  this.archive = hyperdrive(this.db, url, opts)
+  this._open(url)
 }
 
 inherits(Repo, events.EventEmitter)
 
-Repo.prototype._open = function () {
+Repo.prototype._createWebsocket = function (server) {
+  // TODO: dat-daemon?
+}
+
+Repo.prototype._createWebrtcSwarm = function () {
+  var signalhub = Signalhub(this.archive.url.toString('hex'), this.opts.signalhub || ['https://signalhub.mafintosh.com'])
+  return WebrtcSwarm(signalhub, {
+    id: this.db.discoveryKey,
+    hash: false,
+    stream: () => this.archive.replicate()
+  })
+}
+
+Repo.prototype._open = function (url) {
   var self = this
   this.archive.ready(function () {
-    var signalhub = Signalhub('dat-' + self.archive.key.toString('hex'), self.opts.signalhub || 'https://signalhub.mafintosh.com')
-    self.key = self.archive.key.toString('hex')
-    self.swarm = self.swarm || swarm(signalhub)
-    self.join()
+    self._createWebrtcSwarm()
+    if (self.opts.websocketServer) self._createWebsocket(self.opts.websocketServer)
     self.emit('ready')
   })
-}
-
-/**
- * Joins the swarm for the given repo.
- * @param  {Repo}   repo
- */
-Repo.prototype.join =
-Repo.prototype.resume = function () {
-  this.swarm.on('peer', this._replicate.bind(this))
-}
-
-/**
- * Internal function for replicating the archive to the swarm
- * @param  {[type]} peer A webrtc-swarm peer
- */
-Repo.prototype._replicate = function (conn) {
-  var peer = this.archive.replicate({
-    upload: true,
-    download: true
-  })
-  pump(conn, peer, conn)
-}
-
-/**
- * Leaves the swarm for the given repo.
- * @param  {Repo}   repo
- */
-Repo.prototype.leave =
-Repo.prototype.pause = function () {
-  this.swarm.removeListener('peer', this._replicate)
 }
 
 Repo.prototype.destroy =

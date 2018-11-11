@@ -2,11 +2,7 @@
 
 A pure JavaScript browser-friendly api for using dat.
 
-**This repo is not actively maintined. It uses WebRTC for the networking, which none of our other tools use. See [this issue](https://github.com/datproject/dat-js/issues/9) for more details and discussion.**
-
 [Dat](http://datproject.org) is a powerful decentralized data sharing tool. For a Node.js api for working with dats on the filesystem, see [dat-node](http://github.com/datproject/dat-node).
-
-**Note**: Because dat-js uses webrtc, it can only connect to other browser clients. It is not possible for the dat-js library to connect to the UTP and UDP clients used in the Node.js versions.
 
 Want to use Dat in the command line or an app (not build applications)? Check out:
 
@@ -24,7 +20,8 @@ var Dat = require('dat-js')
 var concat = require('concat-stream')
 
 var dat = Dat()
-dat.add('ARCHIVE_KEY', function (repo) {
+var repo = dat.add('dat://SOME_ARCHIVE_URL')
+repo.ready(function () {
   var readStream = repo.archive.createFileReadStream('hello.txt')
   concat(readStream, function (data) {
     console.log(data)
@@ -38,16 +35,18 @@ dat.add('ARCHIVE_KEY', function (repo) {
 var Dat = require('dat-js')
 
 var dat = Dat()
-dat.add(function (repo) {
-  console.log('dat key is:', repo.key)
+var repo = dat.add()
+repo.ready(function () {
+  console.log('dat url is:', repo.url)
   var writer = repo.archive.createFileWriteStream('hello.txt')
   writer.write('world')
-  writer.end(function () { replicate(repo.key) })
+  writer.end(function () { replicate(repo.url) })
 })
 
-function replicate (key) {
+function replicate (url) {
   var clone = Dat()
-  clone.add(key, function (repo) {
+  var repo = clone.add(url)
+  repo.ready(function () {
     var readStream = repo.archive.createFileReadStream('hello.txt')
     readStream.on('data', function (data) {
       console.log(data.toString()) // prints 'world'
@@ -64,9 +63,9 @@ Creates a new dat object. The options passed here will be default for any dats c
 
  * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats.
 
-#### `dat.add(key, [options], [onrepo])`
+#### `dat.add(url, [options], [onrepo])`
 
-Adds a new dat with the given key. Joins the appropriate swarm for that key and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
+Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
 
  * `options`: These options will override any options given in the Dat constructor.
 
@@ -80,9 +79,9 @@ Array of repo instances
 
 The repo object managed by dat.
 
-#### `repo.key`
+#### `repo.url`
 
-The key of the repo
+The url of the repo
 
 #### `repo.destroy()`
 

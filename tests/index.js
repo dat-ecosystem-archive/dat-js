@@ -1,4 +1,3 @@
-var Repo = require('../repo')
 var Dat = require('..')
 var test = require('tape')
 

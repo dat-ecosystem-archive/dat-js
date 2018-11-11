@@ -14,7 +14,6 @@ module.exports = Dat
 function Dat (opts) {
   if (!(this instanceof Dat)) return new Dat(opts)
   events.EventEmitter.call(this)
-  var self = this
   this.opts = opts || {}
   this.repos = []
 }
@@ -22,47 +21,36 @@ function Dat (opts) {
 inherits(Dat, events.EventEmitter)
 
 /**
- * Returns a repo with the given key. Returns undefined
- * if no repository is found with that key.
- * @param  {string} key      The key of the repo.
- * @return {Repo|undefined}  The repo object with the corresponding key.
+ * Returns a repo with the given url. Returns undefined
+ * if no repository is found with that url.
+ * @param  {url} url      The url of the repo.
+ * @return {Repo|undefined}  The repo object with the corresponding url.
  */
-Dat.prototype.get = function (key) {
-  return this.repos.filter(function (repo) {
-    return key.toString('hex') === repo.key.toString('hex')
-  })[0]
+Dat.prototype.get = function (url) {
+  var repos = this.repos.filter(function (repo) {
+    return url.toString('hex') === repo.url.toString('hex')
+  })
+  if (repos.length) return repos[0]
+  return this.add(url)
 }
 
 /**
  * Adds a new dat. Emits a 'repo' event when the undelying archive
  * instance is open.
- * @param {string}   key   The key to the dat.
+ * @param {string}   url   The url to the dat.
  * @param {object}   opts  Options to use when building the dat.
  * @param {Function} cb    The callback with the repo object (optional).
  */
-Dat.prototype.add = function (key, opts, cb) {
+Dat.prototype.add = function (url, opts) {
   var self = this
   if (self.destroyed) throw new Error('client is destroyed')
-  if (typeof opts === 'function') return self.add(key, null, opts)
-  if (typeof key === 'function') return self.add(null, null, key)
+  if (typeof opts === 'function') return self.add(url, null, opts)
+  if (typeof url === 'function') return self.add(null, null, url)
   if (!opts) opts = {}
 
-  var repo = new Repo(key, xtend(this.opts, opts))
+  var repo = new Repo(url, xtend(this.opts, opts))
   self.repos.push(repo)
-
-  repo.once('ready', onready)
-  repo.once('close', onclose)
-
-  function onready () {
-    if (self.destroyed) return
-    if (typeof cb === 'function') cb(repo)
-    self.emit('repo', repo)
-  }
-
-  function onclose () {
-    repo.removeListener('ready', onready)
-    repo.removeListener('close', onclose)
-  }
+  return repo
 }
 
 /**
