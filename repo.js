@@ -4,6 +4,7 @@ var WebrtcSwarm = require('@geut/discovery-swarm-webrtc')
 var Signalhub = require('signalhub')
 var hyperdrive = require('hyperdrive')
 var ram = require('random-access-memory')
+var websocket = require('websocket-stream')
 
 module.exports = Repo
 
@@ -25,7 +26,11 @@ function Repo (url, opts) {
 inherits(Repo, events.EventEmitter)
 
 Repo.prototype._createWebsocket = function (server) {
-  // TODO: dat-daemon?
+  var url = server + '/' + this.db.discoveryKey.toString('hex')
+
+  this.websocket = websocket(url)
+
+  this.websocket.pipe(this.db.replicate()).pipe(this.websocket)
 }
 
 Repo.prototype._createWebrtcSwarm = function () {
@@ -54,4 +59,6 @@ Repo.prototype.close = function () {
       self.emit('close')
     })
   })
+
+  if(this.websocket) this.websocket.close()
 }

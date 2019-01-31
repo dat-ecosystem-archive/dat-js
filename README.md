@@ -55,6 +55,24 @@ function replicate (url) {
 }
 ```
 
+#### Replication with a websocket gateway
+
+```js
+var Dat = require('dat-js')
+var concat = require('concat-stream')
+
+var dat = Dat({
+  websocketServer: 'ws://gateway.mauve.moe:3000'
+})
+var repo = dat.add('dat://SOME_ARCHIVE_URL')
+repo.ready(function () {
+  var readStream = repo.archive.createFileReadStream('hello.txt')
+  concat(readStream, function (data) {
+    console.log(data)
+  })
+})
+```
+
 ## API
 
 #### `var dat = new Dat([options])`

@@ -23,6 +23,7 @@
     "random-access-memory": "^2.4.0",
     "signalhub": "^4.8.0",
     "webrtc-swarm": "^2.8.0",
+    "websocket-stream": "^5.1.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
