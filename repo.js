@@ -26,20 +26,31 @@ function Repo (url, opts) {
 inherits(Repo, events.EventEmitter)
 
 Repo.prototype._createWebsocket = function (server) {
-  var url = server + '/' + this.db.discoveryKey.toString('hex')
+  var url = server + '/' + this.archive.key.toString('hex')
 
   this.websocket = websocket(url)
 
-  this.websocket.pipe(this.db.replicate()).pipe(this.websocket)
+  this.websocket.pipe(this.archive.replicate({
+    sparse: true,
+    live: true
+  })).pipe(this.websocket)
 }
 
 Repo.prototype._createWebrtcSwarm = function () {
-  var signalhub = Signalhub(this.archive.url.toString('hex'), this.opts.signalhub || ['https://signalhub.mafintosh.com'])
-  return WebrtcSwarm(signalhub, {
+  // TODO: Detect whether the page is HTTPS or not in order to set the protocol
+  // I had to set it to HTTP temporarily so that it would work on localhost on Firefox
+  var signalhub = Signalhub(this.archive.key.toString('hex'), this.opts.signalhub || ['http://signalhub.mafintosh.com'])
+  var swarm = WebrtcSwarm({
+
+    // TODO: Check that this is a good value to have for the id
     id: this.db.discoveryKey,
     hash: false,
     stream: () => this.archive.replicate()
   })
+
+  swarm.join(signalhub)
+
+  return swarm
 }
 
 Repo.prototype._open = function (url) {

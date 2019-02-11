@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/karissa/dat-js#readme",
   "dependencies": {
+    "@geut/discovery-swarm-webrtc": "^1.1.0",
     "hyperdrive": "^9.4.7",
     "pump": "^1.0.2",
     "random-access-memory": "^2.4.0",
