@@ -28,7 +28,7 @@ inherits(Dat, events.EventEmitter)
  */
 Dat.prototype.get = function (url) {
   var repos = this.repos.filter(function (repo) {
-    return url.toString('hex') === repo.url.toString('hex')
+    return repo.url = url
   })
   if (repos.length) return repos[0]
   return this.add(url)
@@ -39,17 +39,18 @@ Dat.prototype.get = function (url) {
  * instance is open.
  * @param {string}   url   The url to the dat.
  * @param {object}   opts  Options to use when building the dat.
- * @param {Function} cb    The callback with the repo object (optional).
  */
 Dat.prototype.add = function (url, opts) {
   var self = this
   if (self.destroyed) throw new Error('client is destroyed')
-  if (typeof opts === 'function') return self.add(url, null, opts)
-  if (typeof url === 'function') return self.add(null, null, url)
   if (!opts) opts = {}
 
   var repo = new Repo(url, xtend(this.opts, opts))
   self.repos.push(repo)
+
+  setTimeout(() => {
+    this.emit('repo', repo)
+  }, 0)
   return repo
 }
 
