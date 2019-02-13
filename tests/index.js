@@ -32,39 +32,35 @@ test('create a dat in memory', function (t) {
   })
 })
 
-// TODO: Create 2 dat instances, create new repo, get key and create repo in second dat
-test.skip('replicate a dat using WebRTC', function (t) {
+test('replicate a dat using WebRTC', function (t) {
   var dat1 = new Dat()
   var dat2 = new Dat()
   t.equals(dat1.repos.length, 0, 'has zero repos before adding')
   t.equals(dat2.repos.length, 0, 'has zero repos before adding')
 
-  dat.add(key, function (repo) {
-    var url = window.location.host + '/#' + repo.key.toString('hex')
-    document.querySelector('body').innerHTML = `<a href="${url}" target="_blank">${url}</a>`
-    var therepo = dat.get(repo.key)
-    t.equals(therepo.key, repo.key, 'get works')
-    t.equals(dat.repos.length, 1, 'clone has one repo after adding')
-    if (repo.archive.owner) {
-      console.log('writing to dat')
-      var writer = repo.archive.createFileWriteStream('hello.txt')
-      writer.write('world')
-      writer.end()
-      t.end()
-    } else {
-      console.log('reading from dat')
-      t.equals(repo.archive.key.toString('hex'), key)
-      repo.swarm.on('peer', function (conn) {
-        t.ok(conn, 'got a peer')
+  var repo1 = dat1.add(null)
+
+  repo1.ready(() => {
+
+    repo1.archive.writeFile('/example.txt', 'Hello World!', (err) => {
+      t.notOk(err, 'no error when writing')
+
+      var url = repo1.url
+      
+      repo2 = dat2.get(url)
+
+      repo2.archive.readFile('/example.txt', 'utf-8', (err, data) => {
+        t.notOk(err, 'no errors when reading')
+
+        t.equals(data, 'Hello World!')
+
+        dat1.close(() => {
+          dat2.close(() => {
+            t.end()
+          })
+        })
       })
-      repo.archive.on('syncing', function () {
-        t.ok('syncing', 'syncing')
-      })
-      repo.archive.on('sync', function () {
-        t.equals(repo.archive.content.bytes, 5, 'have same size')
-        t.end()
-      })
-    }
+    })
   })
 })
 

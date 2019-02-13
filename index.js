@@ -58,7 +58,9 @@ Dat.prototype.add = function (url, opts) {
  * Closes the dat, the swarm, and all underlying repo instances.
  */
 Dat.prototype.destroy =
-Dat.prototype.close = function () {
+Dat.prototype.close = function (cb) {
+  if(cb) this.once('close', cb)
+
   while (this.repos.length) {
     var repo = this.repos.pop()
     repo.close()

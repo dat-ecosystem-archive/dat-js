@@ -9,7 +9,7 @@ var websocket = require('websocket-stream')
 var DEFAULT_WEBSOCKET_RECONNECT = 1000
 var DAT_PROTOCOL = 'dat://'
 
-var DEFAULT_SIGNALHUBS = ['http://signalhub.mafintosh.com']
+var DEFAULT_SIGNALHUBS = ['http://gateway.mauve.moe:3463']
 
 module.exports = Repo
 
@@ -100,8 +100,10 @@ Repo.prototype.ready = function(cb) {
 }
 
 Repo.prototype.destroy =
-Repo.prototype.close = function () {
+Repo.prototype.close = function (cb) {
   var self = this
+
+  if(cb) this.once('close', cb)
 
   for (let channel of self.swarm.channels.values()) {
     channel.swarm.close()
