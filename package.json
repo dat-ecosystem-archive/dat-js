@@ -22,7 +22,7 @@
     "hyperdrive": "^9.4.7",
     "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
-    "signalhubws": "github:datproject/dat-js#patch-1",
+    "signalhubws": "github:RangerMauve/signalhubws#patch-1",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.0",
     "webrtc-swarm": "^2.9.0",
