@@ -2,6 +2,7 @@ const xtend = require('xtend')
 const EventEmitter = require('events').EventEmitter
 const sodium = require('sodium-universal')
 const bufferAlloc = require('buffer-alloc-unsafe')
+const parallel = require('run-parallel')
 
 const Repo = require('./repo')
 
@@ -66,16 +67,19 @@ class Dat extends EventEmitter {
    * Closes the dat, the swarm, and all underlying repo instances.
    */
   close (cb) {
+    if(this.destroyed) return
     this.destroyed = true
 
     if(cb) this.once('close', cb)
 
-    while (this.repos.length) {
-      const repo = this.repos.pop()
-      repo.close()
-    }
-
-    this.emit('close')
+    parallel(this.repos.map((repo) => {
+      return (cb) => {
+        repo.close(cb)
+      }
+    }), (err) => {
+      this.repos = []
+      this.emit('close')
+    })
   }
 
   destroy (cb) {

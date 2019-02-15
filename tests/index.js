@@ -24,7 +24,6 @@ test('create a dat in memory', function (t) {
 
     repo.close()
 
-    // TODO: What's this for?
     repo.on('close', function () {
       dat.close()
     })

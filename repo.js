@@ -5,7 +5,7 @@ const ram = require('random-access-memory')
 const websocket = require('websocket-stream')
 const WebrtcSwarm = require('webrtc-swarm')
 const pump = require('pump')
-var through = require('through2')
+const through = require('through2')
 
 const DEFAULT_WEBSOCKET_RECONNECT = 1000
 const DEFAULT_WEBSOCKET_CONNECTION_DELAY = 1000
@@ -50,14 +50,6 @@ class Repo extends EventEmitter {
     this.swarm = null
     this.websocket = null
     this._websocketTimer = null
-
-    // If no URL was provided, we should set it once the archive is ready
-    if(!url) {
-      this.ready(() => {
-        const url = 'dat://' + this.archive.key.toString('hex')
-        this.url = url
-      })
-    }
 
     this._open()
   }
@@ -134,6 +126,11 @@ class Repo extends EventEmitter {
 
   _open () {
     this.archive.ready(() => {
+      // If no URL was provided, we should set it once the archive is ready
+      if(!this.url) {
+        const url = 'dat://' + this.archive.key.toString('hex')
+        this.url = url
+      }
       this._joinWebrtcSwarm()
       this._startWebsocketTimer()
       this._isReady = true

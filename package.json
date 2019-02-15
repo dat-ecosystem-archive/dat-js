@@ -22,6 +22,7 @@
     "hyperdrive": "^9.4.7",
     "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
+    "run-parallel": "^1.1.9",
     "signalhubws": "github:RangerMauve/signalhubws#patch-1",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.0",
