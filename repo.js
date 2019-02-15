@@ -14,6 +14,9 @@ const DAT_PROTOCOL = 'dat://'
 
 const DEFAULT_SIGNALHUBS = ['ws://gateway.mauve.moe:3300']
 
+// Check if the page was loaded from HTTPS
+const IS_SECURE = self.location.href.startsWith('https')
+
 module.exports =
 
 class Repo extends EventEmitter {
@@ -62,9 +65,10 @@ class Repo extends EventEmitter {
   // Attempt to create a websocket connection to a gateway if possible
   _createWebsocket () {
     if(!this.opts.gateway) return
-    const server = this.opts.gateway
+    const servers = [].concat(this.opts.gateway)
+    const server = chooseRandom(servers)
 
-    const url = server + '/' + this.archive.key.toString('hex')
+    const url = setSecure(server + '/' + this.archive.key.toString('hex'))
 
     this.websocket = websocket(url)
 
@@ -85,10 +89,11 @@ class Repo extends EventEmitter {
   }
 
   _joinWebrtcSwarm () {
-    // TODO: Detect whether the page is HTTPS or not in order to set the protocol
-    const hubs = [].concat(this.opts.signalhub || DEFAULT_SIGNALHUBS)
+    const hubs = [].concat(this.opts.signalhub || DEFAULT_SIGNALHUBS).map(setSecure)
 
-    const signalhub = Signalhub(this.archive.discoveryKey.toString('hex').slice(40), this.opts.signalhub || DEFAULT_SIGNALHUBS)
+    const appName = this.archive.discoveryKey.toString('hex').slice(40)
+
+    const signalhub = Signalhub(appName, hubs)
 
     this.signalhub = signalhub
 
@@ -167,4 +172,29 @@ class Repo extends EventEmitter {
   destroy (cb) {
     this.close(cb)
   }
+}
+
+// Convert URLs to be HTTPS or not based on whether the page is
+function setSecure(url) {
+  if(IS_SECURE) {
+    if(url.startsWith('http:')) {
+      return 'https:' + url.slice(6)
+    } else if(url.startsWith('ws:')) {
+      return 'wss:' + url.slice(3)
+    } else {
+      return url
+    }
+  } else {
+    if(url.startsWith('https:')) {
+      return 'http:' + url.slice(7)
+    } else if(url.startsWith('wss:')) {
+      return 'ws:' + url.slice(4)
+    } else {
+      return url
+    }
+  }
+}
+
+function chooseRandom(list) {
+  return list[Math.floor(Math.random() * list.length)]
 }
