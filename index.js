@@ -42,18 +42,25 @@ class Dat extends EventEmitter {
    * @param {object}   opts  Options to use when building the dat.
    */
   add (url, opts) {
-    const self = this
-    if (self.destroyed) throw new Error('client is destroyed')
+    if (this.destroyed) throw new Error('client is destroyed')
     if (!opts) opts = {}
 
     const repo = new Repo(url, xtend(this.opts, opts))
-    self.repos.push(repo)
+    this.repos.push(repo)
 
     repo.ready(() => {
       this.emit('repo', repo)
     })
 
     return repo
+  }
+
+  create (opts) {
+    return this.add(null, opts)
+  }
+
+  has (url) {
+    return !!this.repos.find((repo) => repo.url === url)
   }
 
   /**

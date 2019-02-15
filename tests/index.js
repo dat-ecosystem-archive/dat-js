@@ -72,7 +72,7 @@ test('replicate a dat over websockets', function (t) {
   t.plan(4)
 
   var dat = new Dat({
-    websocketServer: 'ws://gateway.mauve.moe:3000'
+    gateway: 'ws://gateway.mauve.moe:3000'
   })
 
   t.equals(dat.repos.length, 0, 'has zero repos before adding')
