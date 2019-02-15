@@ -9,20 +9,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/karissa/dat-js.git"
+    "url": "git+ssh://git@github.com/datproject/dat-js.git"
   },
   "author": "Karissa McKelvey <karissa@datproject.org>",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/karissa/dat-js/issues"
+    "url": "https://github.com/datproject/dat-js/issues"
   },
-  "homepage": "https://github.com/karissa/dat-js#readme",
+  "homepage": "https://github.com/datproject/dat-js#readme",
   "dependencies": {
     "buffer-alloc-unsafe": "^1.0.0",
     "hyperdrive": "^9.4.7",
     "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
-    "signalhubws": "^1.0.8",
+    "signalhubws": "github:datproject/dat-js#patch-1",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.0",
     "webrtc-swarm": "^2.9.0",
