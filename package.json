@@ -22,7 +22,7 @@
     "hyperdrive": "^9.4.7",
     "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
-    "signalhub": "^4.8.0",
+    "signalhubws": "^1.0.8",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.0",
     "webrtc-swarm": "^2.9.0",

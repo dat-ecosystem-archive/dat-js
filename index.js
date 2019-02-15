@@ -1,8 +1,7 @@
-const inherits = require('util').inherits
 const xtend = require('xtend')
 const EventEmitter = require('events').EventEmitter
-var sodium = require('sodium-universal')
-var bufferAlloc = require('buffer-alloc-unsafe')
+const sodium = require('sodium-universal')
+const bufferAlloc = require('buffer-alloc-unsafe')
 
 const Repo = require('./repo')
 
@@ -86,7 +85,7 @@ class Dat extends EventEmitter {
 
 // Based on code from hypercore-protocol https://github.com/mafintosh/hypercore-protocol/blob/master/index.js#L502
 function randomBytes (n) {
-  var buf = bufferAlloc(n)
+  const buf = bufferAlloc(n)
   sodium.randombytes_buf(buf)
   return buf
 }
