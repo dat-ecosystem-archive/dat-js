@@ -19,7 +19,7 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 var Dat = require('dat-js')
 var concat = require('concat-stream')
 
-var dat = Dat()
+var dat = new Dat()
 var repo = dat.add('dat://SOME_ARCHIVE_URL')
 repo.ready(function () {
   var readStream = repo.archive.createFileReadStream('hello.txt')
@@ -34,8 +34,8 @@ repo.ready(function () {
 ```js
 var Dat = require('dat-js')
 
-var dat = Dat()
-var repo = dat.add()
+var dat = new Dat()
+var repo = dat.create()
 repo.ready(function () {
   console.log('dat url is:', repo.url)
   var writer = repo.archive.createFileWriteStream('hello.txt')
@@ -44,7 +44,7 @@ repo.ready(function () {
 })
 
 function replicate (url) {
-  var clone = Dat()
+  var clone = new Dat()
   var repo = clone.add(url)
   repo.ready(function () {
     var readStream = repo.archive.createFileReadStream('hello.txt')
@@ -61,8 +61,8 @@ function replicate (url) {
 var Dat = require('dat-js')
 var concat = require('concat-stream')
 
-var dat = Dat({
-  websocketServer: 'ws://gateway.mauve.moe:3000'
+var dat = new Dat({
+  gateway: 'ws://gateway.mauve.moe:3000'
 })
 var repo = dat.add('dat://SOME_ARCHIVE_URL')
 repo.ready(function () {
@@ -73,18 +73,64 @@ repo.ready(function () {
 })
 ```
 
+#### Persisting a created dat and loading it from storage
+
+```js
+var Dat = require('dat-js')
+var db = require('random-access-idb')('dats')
+
+var dat = new Dat()
+
+var repo = dat.create({
+  db: db
+})
+
+repo.ready(() => {
+  repo.archive.writeFile('/example.txt', 'Hello World!', () => {
+    // Save it for later
+    localStorage.setItem('My_Repo', repo.url)
+  })
+})
+
+// Next time your app loads
+
+var repo = dat.get(localStorage.getItem('My_Repo'), {
+  db: db
+})
+
+repo.archive.readFile('/example.txt', 'utf-8', (err, data) => {
+  console.log(`It's still there: ${data}`)
+})
+```
+
 ## API
 
 #### `var dat = new Dat([options])`
 
 Creates a new dat object. The options passed here will be default for any dats created using the `add` method.
 
- * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats.
+ * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats. In addition it has the following:
+  * `signalhub`: An optional string or array of strings for [signalhubws](https://github.com/soyuka/signalhubws) servers to use for WebRTC
+  * `gateway`: An optional string or array of strings for [dat-gateway](https://github.com/garbados/dat-gateway/) instances for websocket replication.
 
-#### `dat.add(url, [options], [onrepo])`
+### `dat.get(url, [options])`
 
-Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
+Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data. If the dat was already added, it will return the existing instance.
 
+ * `url`: Either a `dat://` url or just the public key in string form.
+ * `options`: These options will override any options given in the Dat constructor.
+
+### `dat.create([options])`
+
+Creates a new dat, wait for it to be `ready` before trying to access the url.
+
+* `options`: These options will override any options given in the Dat constructor.
+
+### `dat.add([url], [options])`
+
+Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data.
+
+ * `url`: Either a `dat://` url or just the public key in string form. You can omit the url to create a new dat.
  * `options`: These options will override any options given in the Dat constructor.
 
 ### Properties
@@ -99,7 +145,11 @@ The repo object managed by dat.
 
 #### `repo.url`
 
-The url of the repo
+The `dat://` url of the repo. Note that for newly created repos, you must wait for it to be `ready`.
+
+### `rep.ready(cb)`
+
+Invokes the `cb` once the repo is fully initialized. You can do reads and writes from the archive before then, but this is important if you're creating a new archive. If the repo is already `ready`, it will invoke `cb` on the next tick.
 
 #### `repo.destroy()`
 
