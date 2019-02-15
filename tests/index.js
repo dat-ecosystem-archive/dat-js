@@ -55,7 +55,7 @@ test('replicate a dat using WebRTC', function (t) {
       repo2.archive.readFile('/example.txt', 'utf-8', (err, data) => {
         t.notOk(err, 'no errors when reading')
 
-        t.equals(data, 'Hello World!')
+        t.equals(data, 'Hello World!', 'got proper data from archive')
 
         dat1.close(() => {
           dat2.close(() => {
@@ -118,8 +118,8 @@ test('replicate multiple repos over WebRTC', function (t) {
             t.notOk(err1, 'no error reading first repo')
             t.ok(data1, 'got data from first repo')
             repo2_1.archive.readFile('/example.txt', function(err2, data2) {
-              t.notOk(err2, 'no error reading first repo')
-              t.ok(data2, 'got data from first repo')
+              t.notOk(err2, 'no error reading second repo')
+              t.ok(data2, 'got data from second repo')
               dat1.close(function () {
                 dat2.close(function () {
                   t.end()

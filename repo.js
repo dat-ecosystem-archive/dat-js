@@ -1,6 +1,5 @@
-const inherits = require('util').inherits
 const EventEmitter = require('events').EventEmitter
-const Signalhub = require('signalhub')
+const Signalhub = require('signalhubws')
 const hyperdrive = require('hyperdrive')
 const ram = require('random-access-memory')
 const websocket = require('websocket-stream')
@@ -10,7 +9,7 @@ const pump = require('pump')
 const DEFAULT_WEBSOCKET_RECONNECT = 1000
 const DAT_PROTOCOL = 'dat://'
 
-const DEFAULT_SIGNALHUBS = ['http://gateway.mauve.moe:3463']
+const DEFAULT_SIGNALHUBS = ['ws://gateway.mauve.moe:3300']
 
 module.exports =
 
