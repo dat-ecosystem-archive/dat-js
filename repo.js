@@ -112,7 +112,7 @@ class Repo extends EventEmitter {
         }, DEFAULT_WEBSOCKET_CONNECTION_DELAY_LONG)
         cb()
         // We did the thing so no need to listen any further
-        subscription.end()
+        subscription.destroy()
       }
     })
 
