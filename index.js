@@ -1,6 +1,8 @@
 const inherits = require('util').inherits
 const xtend = require('xtend')
 const EventEmitter = require('events').EventEmitter
+var sodium = require('sodium-universal')
+var bufferAlloc = require('buffer-alloc-unsafe')
 
 const Repo = require('./repo')
 
@@ -15,6 +17,9 @@ class Dat extends EventEmitter {
   constructor (opts) {
     super()
     this.opts = opts || {}
+
+    if(!this.opts.id) this.opts.id = randomBytes(32)
+
     this.repos = []
   }
 
@@ -25,8 +30,8 @@ class Dat extends EventEmitter {
    * @return {Repo|undefined}  The repo object with the corresponding url.
    */
   get (url) {
-    const repos = this.repos.filter((repo) => repo.url === url)
-    if (repos.length) return repos[0]
+    const repo = this.repos.find((repo) => repo.url === url)
+    if (repo) return repo
     return this.add(url)
   }
 
@@ -44,9 +49,9 @@ class Dat extends EventEmitter {
     const repo = new Repo(url, xtend(this.opts, opts))
     self.repos.push(repo)
 
-    setTimeout(() => {
+    repo.ready(() => {
       this.emit('repo', repo)
-    }, 0)
+    })
 
     return repo
   }
@@ -55,6 +60,8 @@ class Dat extends EventEmitter {
    * Closes the dat, the swarm, and all underlying repo instances.
    */
   close (cb) {
+    this.destroyed = true
+
     if(cb) this.once('close', cb)
 
     while (this.repos.length) {
@@ -62,11 +69,17 @@ class Dat extends EventEmitter {
       repo.close()
     }
 
-    this.destroyed = true
     this.emit('close')
   }
 
   destroy (cb) {
     this.close(cb)
   }
+}
+
+// Based on code from hypercore-protocol https://github.com/mafintosh/hypercore-protocol/blob/master/index.js#L502
+function randomBytes (n) {
+  var buf = bufferAlloc(n)
+  sodium.randombytes_buf(buf)
+  return buf
 }

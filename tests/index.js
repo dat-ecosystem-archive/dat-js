@@ -12,21 +12,24 @@ test('create a dat in memory', function (t) {
   t.equals(dat.repos.length, 0, 'has zero repos before adding')
   var repo = dat.add()
 
+  dat.on('repo', (repo) => {
+    t.ok(repo, 'emits the repo event')
+    t.equals(repo.url.length, DAT_URL_LENGTH, 'repo key is there')
+  })
+
   t.equals(dat.repos.length, 1, 'has one repo after adding')
   repo.ready(() => {
     t.equals(repo.archive.key.length, DAT_KEY_BYTE_LENGTH, 'has key with proper length')
     t.equals(repo.archive.key.toString('hex'), repo.url.slice(DAT_PROTOCOL.length), 'key is the archive key')
 
+    repo.close()
+
     // TODO: What's this for?
     repo.on('close', function () {
+      dat.close()
     })
   })
 
-  dat.on('repo', (repo) => {
-    t.ok(repo, 'emits the repo event')
-    t.equals(repo.url.length, DAT_URL_LENGTH, 'repo key is there')
-    dat.close()
-  })
   dat.on('close', () => {
     t.end()
   })
@@ -46,7 +49,7 @@ test('replicate a dat using WebRTC', function (t) {
       t.notOk(err, 'no error when writing')
 
       var url = repo1.url
-      
+
       repo2 = dat2.get(url)
 
       repo2.archive.readFile('/example.txt', 'utf-8', (err, data) => {
@@ -66,6 +69,8 @@ test('replicate a dat using WebRTC', function (t) {
 
 
 test('replicate a dat over websockets', function (t) {
+  t.plan(4)
+
   var dat = new Dat({
     websocketServer: 'ws://gateway.mauve.moe:3000'
   })
@@ -89,5 +94,41 @@ test('replicate a dat over websockets', function (t) {
 
   repo.once('close', () => {
     t.end()
+  })
+})
+
+test('replicate multiple repos over WebRTC', function (t) {
+  var dat1 = new Dat()
+  var dat2 = new Dat()
+
+  var repo1_1 = dat1.add(null)
+  var repo2_2 = dat2.add(null)
+
+  repo1_1.ready(function () {
+    repo1_1.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
+    repo2_2.ready(function () {
+      repo2_2.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
+
+      const repo1_2 = dat2.get(repo1_1.url)
+      const repo2_1 = dat1.get(repo2_2.url)
+
+      repo1_2.ready(function () {
+        repo2_1.ready(function () {
+          repo1_2.archive.readFile('/example.txt', function(err1, data1) {
+            t.notOk(err1, 'no error reading first repo')
+            t.ok(data1, 'got data from first repo')
+            repo2_1.archive.readFile('/example.txt', function(err2, data2) {
+              t.notOk(err2, 'no error reading first repo')
+              t.ok(data2, 'got data from first repo')
+              dat1.close(function () {
+                dat2.close(function () {
+                  t.end()
+                })
+              })
+            })
+          })
+        })
+      })
+    })
   })
 })
