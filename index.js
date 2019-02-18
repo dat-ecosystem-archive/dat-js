@@ -18,7 +18,7 @@ class Dat extends EventEmitter {
     super()
     this.opts = opts || {}
 
-    if(!this.opts.id) this.opts.id = randomBytes(32)
+    if (!this.opts.id) this.opts.id = randomBytes(32)
 
     this.repos = []
   }
@@ -67,19 +67,19 @@ class Dat extends EventEmitter {
    * Closes the dat, the swarm, and all underlying repo instances.
    */
   close (cb) {
-    if(this.destroyed) {
-      if(cb) process.nextTick(cb)
+    if (this.destroyed) {
+      if (cb) process.nextTick(cb)
       return
     }
     this.destroyed = true
 
-    if(cb) this.once('close', cb)
+    if (cb) this.once('close', cb)
 
     parallel(this.repos.map((repo) => {
       return (cb) => {
         repo.close(cb)
       }
-    }), (err) => {
+    }), () => {
       this.repos = []
       this.emit('close')
     })

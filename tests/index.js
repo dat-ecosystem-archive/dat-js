@@ -45,13 +45,12 @@ test('replicate a dat using WebRTC', function (t) {
   var repo1 = dat1.add(null)
 
   repo1.ready(() => {
-
     repo1.archive.writeFile('/example.txt', 'Hello World!', (err) => {
       t.notOk(err, 'no error when writing')
 
       var url = repo1.url
 
-      repo2 = dat2.get(url)
+      var repo2 = dat2.get(url)
 
       repo2.archive.readFile('/example.txt', 'utf-8', (err, data) => {
         t.notOk(err, 'no errors when reading')
@@ -68,7 +67,6 @@ test('replicate a dat using WebRTC', function (t) {
   })
 })
 
-
 test('replicate a dat over websockets', function (t) {
   t.plan(4)
 
@@ -80,7 +78,7 @@ test('replicate a dat over websockets', function (t) {
 
   // Load the dat project website through the WS gateway
   var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
-  var repo = dat.add(key);
+  var repo = dat.add(key)
 
   repo.once('ready', () => {
     t.equals(repo.archive.key.toString('hex'), key, 'has the correct key')
@@ -104,7 +102,7 @@ test('use readStream without waiting for the ready event', function (t) {
   })
 
   var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
-  var repo = dat.get(key);
+  var repo = dat.get(key)
 
   var readStream = repo.archive.createReadStream('/about/index.html')
 
@@ -126,23 +124,23 @@ test('replicate multiple repos over WebRTC', function (t) {
   var dat1 = new Dat()
   var dat2 = new Dat()
 
-  var repo1_1 = dat1.add(null)
-  var repo2_2 = dat2.add(null)
+  var repo11 = dat1.add(null)
+  var repo22 = dat2.add(null)
 
-  repo1_1.ready(function () {
-    repo1_1.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
-    repo2_2.ready(function () {
-      repo2_2.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
+  repo11.ready(function () {
+    repo11.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
+    repo22.ready(function () {
+      repo22.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
 
-      const repo1_2 = dat2.get(repo1_1.url)
-      const repo2_1 = dat1.get(repo2_2.url)
+      const repo12 = dat2.get(repo11.url)
+      const repo21 = dat1.get(repo22.url)
 
-      repo1_2.ready(function () {
-        repo2_1.ready(function () {
-          repo1_2.archive.readFile('/example.txt', function(err1, data1) {
+      repo12.ready(function () {
+        repo21.ready(function () {
+          repo12.archive.readFile('/example.txt', function (err1, data1) {
             t.notOk(err1, 'no error reading first repo')
             t.ok(data1, 'got data from first repo')
-            repo2_1.archive.readFile('/example.txt', function(err2, data2) {
+            repo21.archive.readFile('/example.txt', function (err2, data2) {
               t.notOk(err2, 'no error reading second repo')
               t.ok(data2, 'got data from second repo')
               dat1.close(function () {

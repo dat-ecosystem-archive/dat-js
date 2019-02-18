@@ -1,3 +1,4 @@
+/* global self */
 const EventEmitter = require('events').EventEmitter
 const Signalhub = require('signalhubws')
 const hyperdrive = require('hyperdrive')
@@ -26,13 +27,13 @@ class Repo extends EventEmitter {
   * @param {Object} opts   Options to use in the archive instance
   */
   constructor (url, opts) {
-    if(!opts) throw new TypeError('Repo must have optsions passed in from `Dat` instance')
+    if (!opts) throw new TypeError('Repo must have optsions passed in from `Dat` instance')
     super()
-    let key = null;
+    let key = null
 
     // Make sure that the URL looks like `dat://somekey` if it exists
-    if(url) {
-      if(url.indexOf(DAT_PROTOCOL) === 0) {
+    if (url) {
+      if (url.indexOf(DAT_PROTOCOL) === 0) {
         key = url.slice(DAT_PROTOCOL.length)
       } else {
         key = url
@@ -56,7 +57,7 @@ class Repo extends EventEmitter {
 
   // Attempt to create a websocket connection to a gateway if possible
   _createWebsocket () {
-    if(!this.opts.gateway) return
+    if (!this.opts.gateway) return
     const servers = [].concat(this.opts.gateway)
     const server = chooseRandom(servers)
 
@@ -127,7 +128,7 @@ class Repo extends EventEmitter {
   _open () {
     this.archive.ready(() => {
       // If no URL was provided, we should set it once the archive is ready
-      if(!this.url) {
+      if (!this.url) {
         const url = 'dat://' + this.archive.key.toString('hex')
         this.url = url
       }
@@ -139,19 +140,19 @@ class Repo extends EventEmitter {
   }
 
   ready (cb) {
-    if(this._isReady) {
+    if (this._isReady) {
       process.nextTick(cb)
     }
     this.once('ready', cb)
   }
 
   close (cb) {
-    if(this.destroyed) {
-      if(cb) process.nextTick(cb)
+    if (this.destroyed) {
+      if (cb) process.nextTick(cb)
       return
     }
     this.destroyed = true
-    if(cb) this.once('close', cb)
+    if (cb) this.once('close', cb)
 
     // Close the gateway socket if one exists
     if (this.websocket) {
@@ -177,19 +178,19 @@ class Repo extends EventEmitter {
 }
 
 // Convert URLs to be HTTPS or not based on whether the page is
-function setSecure(url) {
-  if(IS_SECURE) {
-    if(url.startsWith('http:')) {
+function setSecure (url) {
+  if (IS_SECURE) {
+    if (url.startsWith('http:')) {
       return 'https:' + url.slice(6)
-    } else if(url.startsWith('ws:')) {
+    } else if (url.startsWith('ws:')) {
       return 'wss:' + url.slice(3)
     } else {
       return url
     }
   } else {
-    if(url.startsWith('https:')) {
+    if (url.startsWith('https:')) {
       return 'http:' + url.slice(7)
-    } else if(url.startsWith('wss:')) {
+    } else if (url.startsWith('wss:')) {
       return 'ws:' + url.slice(4)
     } else {
       return url
@@ -197,6 +198,6 @@ function setSecure(url) {
   }
 }
 
-function chooseRandom(list) {
+function chooseRandom (list) {
   return list[Math.floor(Math.random() * list.length)]
 }
