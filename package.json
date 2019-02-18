@@ -19,11 +19,12 @@
   "homepage": "https://github.com/datproject/dat-js#readme",
   "dependencies": {
     "buffer-alloc-unsafe": "^1.0.0",
+    "dat-encoding": "^5.0.1",
     "hyperdrive": "^9.4.7",
     "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
     "run-parallel": "^1.1.9",
-    "signalhubws": "^1.0.9",
+    "signalhubws": "^1.0.10",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.0",
     "webrtc-swarm": "^2.9.0",

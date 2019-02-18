@@ -7,12 +7,13 @@ var DAT_PROTOCOL = 'dat://'
 var DAT_KEY_STRING_LENGTH = 64
 var DAT_KEY_BYTE_LENGTH = 32
 var DAT_URL_LENGTH = DAT_PROTOCOL.length + DAT_KEY_STRING_LENGTH
+var GATEWAY_URL = 'wss://gateway.mauve.moe'
 
 test('create a dat in memory', function (t) {
   t.plan(6)
   var dat = new Dat()
   t.equals(dat.repos.length, 0, 'has zero repos before adding')
-  var repo = dat.add()
+  var repo = dat.create()
 
   dat.on('repo', (repo) => {
     t.ok(repo, 'emits the repo event')
@@ -42,7 +43,7 @@ test('replicate a dat using WebRTC', function (t) {
   t.equals(dat1.repos.length, 0, 'has zero repos before adding')
   t.equals(dat2.repos.length, 0, 'has zero repos before adding')
 
-  var repo1 = dat1.add(null)
+  var repo1 = dat1.create()
 
   repo1.ready(() => {
     repo1.archive.writeFile('/example.txt', 'Hello World!', (err) => {
@@ -71,14 +72,14 @@ test('replicate a dat over websockets', function (t) {
   t.plan(4)
 
   var dat = new Dat({
-    gateway: 'ws://gateway.mauve.moe:3000'
+    gateway: GATEWAY_URL
   })
 
   t.equals(dat.repos.length, 0, 'has zero repos before adding')
 
   // Load the dat project website through the WS gateway
   var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
-  var repo = dat.add(key)
+  var repo = dat.get(key)
 
   repo.once('ready', () => {
     t.equals(repo.archive.key.toString('hex'), key, 'has the correct key')
@@ -98,7 +99,7 @@ test('replicate a dat over websockets', function (t) {
 
 test('use readStream without waiting for the ready event', function (t) {
   var dat = new Dat({
-    gateway: 'ws://gateway.mauve.moe:3000'
+    gateway: GATEWAY_URL
   })
 
   var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
@@ -124,8 +125,8 @@ test('replicate multiple repos over WebRTC', function (t) {
   var dat1 = new Dat()
   var dat2 = new Dat()
 
-  var repo11 = dat1.add(null)
-  var repo22 = dat2.add(null)
+  var repo11 = dat1.create()
+  var repo22 = dat2.create()
 
   repo11.ready(function () {
     repo11.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')

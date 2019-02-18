@@ -19,7 +19,7 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 var Dat = require('dat-js')
 
 var dat = new Dat()
-var repo = dat.add('dat://SOME_ARCHIVE_URL')
+var repo = dat.get('dat://SOME_ARCHIVE_URL')
 
 var readStream = repo.archive.readFile('hello.txt', (err, data) {
   console.log(data)
@@ -47,7 +47,7 @@ writer.end(function () { replicate(repo.url) })
 
 function replicate (url) {
   var clone = new Dat()
-  var repo = clone.add(url)
+  var repo = clone.get(url)
 
   var readStream = repo.archive.createReadStream('hello.txt')
   readStream.on('data', function (data) {
@@ -66,7 +66,7 @@ var pump = require('pump')
 var dat = new Dat({
   gateway: 'ws://gateway.mauve.moe:3000'
 })
-var repo = dat.add('dat://SOME_ARCHIVE_URL')
+var repo = dat.get('dat://SOME_ARCHIVE_URL')
 
 var readStream = repo.archive.createReadStream('hello.txt')
 
@@ -126,16 +126,9 @@ Creates a new dat, wait for it to be `ready` before trying to access the url.
 
 * `options`: These options will override any options given in the Dat constructor.
 
-### `dat.add([url], [options])`
-
-Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data.
-
- * `url`: Either a `dat://` url or just the public key in string form. You can omit the url to create a new dat.
- * `options`: These options will override any options given in the Dat constructor.
-
 ### `dat.has(url)`
 
-Returns whether a given url has already been loaded already.
+Returns whether a given url has been loaded already.
 
 ### Properties
 

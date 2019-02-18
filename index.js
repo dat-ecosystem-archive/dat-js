@@ -3,6 +3,7 @@ const EventEmitter = require('events').EventEmitter
 const sodium = require('sodium-universal')
 const bufferAlloc = require('buffer-alloc-unsafe')
 const parallel = require('run-parallel')
+const encoding = require('dat-encoding')
 
 const Repo = require('./repo')
 
@@ -32,20 +33,18 @@ class Dat extends EventEmitter {
   get (url) {
     const repo = this.repos.find((repo) => repo.url === url)
     if (repo) return repo
-    return this.add(url)
+    return this._add(url)
   }
 
-  /**
-   * Adds a new dat. Emits a 'repo' event when the undelying archive
-   * instance is open.
-   * @param {string}   url   The url to the dat.
-   * @param {object}   opts  Options to use when building the dat.
-   */
-  add (url, opts) {
+  _add (url, opts) {
     if (this.destroyed) throw new Error('client is destroyed')
     if (!opts) opts = {}
 
-    const repo = new Repo(url, xtend(this.opts, opts))
+    let key = null
+
+    if (url) key = encoding.decode(url)
+
+    const repo = new Repo(key, xtend(this.opts, opts))
     this.repos.push(repo)
 
     repo.ready(() => {
@@ -56,7 +55,7 @@ class Dat extends EventEmitter {
   }
 
   create (opts) {
-    return this.add(null, opts)
+    return this._add(null, opts)
   }
 
   has (url) {

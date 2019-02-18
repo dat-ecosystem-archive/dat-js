@@ -7,13 +7,14 @@ const websocket = require('websocket-stream')
 const WebrtcSwarm = require('webrtc-swarm')
 const pump = require('pump')
 const through = require('through2')
+const encoding = require('dat-encoding')
+const xtend = require('xtend')
 
 const DEFAULT_WEBSOCKET_RECONNECT = 1000
 const DEFAULT_WEBSOCKET_CONNECTION_DELAY = 1000
 const DEFAULT_WEBSOCKET_CONNECTION_DELAY_LONG = 5000
-const DAT_PROTOCOL = 'dat://'
 
-const DEFAULT_SIGNALHUBS = ['ws://gateway.mauve.moe:3300']
+const DEFAULT_SIGNALHUBS = ['wss://signalhubws.mauve.moe']
 
 // Check if the page was loaded from HTTPS
 const IS_SECURE = self.location.href.startsWith('https')
@@ -26,31 +27,24 @@ class Repo extends EventEmitter {
   * @param {string} url    The url
   * @param {Object} opts   Options to use in the archive instance
   */
-  constructor (url, opts) {
-    if (!opts) throw new TypeError('Repo must have optsions passed in from `Dat` instance')
+  constructor (key, opts) {
+    if (!opts) throw new TypeError('Repo must have options passed in from `Dat` instance')
     super()
-    let key = null
 
-    // Make sure that the URL looks like `dat://somekey` if it exists
-    if (url) {
-      if (url.indexOf(DAT_PROTOCOL) === 0) {
-        key = url.slice(DAT_PROTOCOL.length)
-      } else {
-        key = url
-        url = DAT_PROTOCOL + key
-      }
-    }
-
-    this.url = url
+    this.url = null
     this.opts = opts
     this.db = this.opts.db || ram
-    this.archive = hyperdrive(this.db, key, opts)
-    this._isReady = false
+    this.archive = hyperdrive(this.db, key, xtend({
+      sparse: true
+    }, opts))
+    this.isReady = false
 
     this.signalhub = null
     this.swarm = null
     this.websocket = null
     this._websocketTimer = null
+
+    if (key) this.url = 'dat://' + encoding.encode(key)
 
     this._open()
   }
@@ -59,6 +53,9 @@ class Repo extends EventEmitter {
   _createWebsocket () {
     if (!this.opts.gateway) return
     const servers = [].concat(this.opts.gateway)
+
+    if (!servers.length) return
+
     const server = chooseRandom(servers)
 
     const url = setSecure(server + '/' + this.archive.key.toString('hex'))
@@ -129,18 +126,18 @@ class Repo extends EventEmitter {
     this.archive.ready(() => {
       // If no URL was provided, we should set it once the archive is ready
       if (!this.url) {
-        const url = 'dat://' + this.archive.key.toString('hex')
+        const url = 'dat://' + encoding.encode(this.archive.key)
         this.url = url
       }
       this._joinWebrtcSwarm()
       this._startWebsocketTimer()
-      this._isReady = true
+      this.isReady = true
       this.emit('ready')
     })
   }
 
   ready (cb) {
-    if (this._isReady) {
+    if (this.isReady) {
       process.nextTick(cb)
     }
     this.once('ready', cb)
