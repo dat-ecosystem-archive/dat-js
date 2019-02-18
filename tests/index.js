@@ -1,5 +1,7 @@
 var Dat = require('..')
 var test = require('tape')
+var concat = require('concat-stream')
+const pump = require('pump')
 
 var DAT_PROTOCOL = 'dat://'
 var DAT_KEY_STRING_LENGTH = 64
@@ -92,6 +94,30 @@ test('replicate a dat over websockets', function (t) {
   })
 
   repo.once('close', () => {
+    t.end()
+  })
+})
+
+test('use readStream without waiting for the ready event', function (t) {
+  var dat = new Dat({
+    gateway: 'ws://gateway.mauve.moe:3000'
+  })
+
+  var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
+  var repo = dat.get(key);
+
+  var readStream = repo.archive.createReadStream('/about/index.html')
+
+  readStream.once('error', function (e) {
+    t.fail(e)
+  })
+
+  pump(readStream, concat(function (data) {
+    t.ok(data, 'got data from readStream')
+    dat.close()
+  }))
+
+  dat.once('close', function () {
     t.end()
   })
 })

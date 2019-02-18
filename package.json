@@ -23,7 +23,7 @@
     "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
     "run-parallel": "^1.1.9",
-    "signalhubws": "github:RangerMauve/signalhubws#patch-1",
+    "signalhubws": "^1.0.9",
     "sodium-universal": "^2.0.0",
     "through2": "^2.0.0",
     "webrtc-swarm": "^2.9.0",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "browserify": "^14.1.0",
+    "concat-stream": "^2.0.0",
     "tape": "^4.6.3",
     "uglifyjs": "^2.4.10",
     "zuul": "^3.11.1"

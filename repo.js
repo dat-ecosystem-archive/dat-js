@@ -85,7 +85,7 @@ class Repo extends EventEmitter {
 
     const appName = this.archive.discoveryKey.toString('hex').slice(40)
 
-    const signalhub = Signalhub(appName, hubs)
+    const signalhub = new Signalhub(appName, hubs)
 
     this.signalhub = signalhub
 
@@ -140,12 +140,17 @@ class Repo extends EventEmitter {
 
   ready (cb) {
     if(this._isReady) {
-      setTimeout(cb, 0)
+      process.nextTick(cb)
     }
     this.once('ready', cb)
   }
 
   close (cb) {
+    if(this.destroyed) {
+      if(cb) process.nextTick(cb)
+      return
+    }
+    this.destroyed = true
     if(cb) this.once('close', cb)
 
     // Close the gateway socket if one exists
@@ -154,10 +159,10 @@ class Repo extends EventEmitter {
       this.websocket = null
     }
 
-    // Stop accepting new WebRTC peers
-    this.swarm.close(() => {
-      // Disconnect from the signalhub
-      this.signalhub.close(() => {
+    // Disconnect from the signalhub
+    this.signalhub.close(() => {
+      // Disconnect from WebRTC peers
+      this.swarm.close(() => {
         // Close the DB files being used by hyperdrive
         this.archive.close(() => {
           this.emit('close')

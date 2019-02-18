@@ -67,7 +67,10 @@ class Dat extends EventEmitter {
    * Closes the dat, the swarm, and all underlying repo instances.
    */
   close (cb) {
-    if(this.destroyed) return
+    if(this.destroyed) {
+      if(cb) process.nextTick(cb)
+      return
+    }
     this.destroyed = true
 
     if(cb) this.once('close', cb)
