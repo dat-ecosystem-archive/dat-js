@@ -9,24 +9,31 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/karissa/dat-js.git"
+    "url": "git+ssh://git@github.com/datproject/dat-js.git"
   },
   "author": "Karissa McKelvey <karissa@datproject.org>",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/karissa/dat-js/issues"
+    "url": "https://github.com/datproject/dat-js/issues"
   },
-  "homepage": "https://github.com/karissa/dat-js#readme",
+  "homepage": "https://github.com/datproject/dat-js#readme",
   "dependencies": {
-    "hyperdrive": "^7.7.1",
-    "memdb": "^1.3.1",
-    "pump": "^1.0.2",
-    "signalhub": "^4.8.0",
-    "webrtc-swarm": "^2.8.0",
+    "buffer-alloc-unsafe": "^1.0.0",
+    "dat-encoding": "^5.0.1",
+    "hyperdrive": "^9.4.7",
+    "pump": "^1.0.3",
+    "random-access-memory": "^2.4.0",
+    "run-parallel": "^1.1.9",
+    "signalhubws": "^1.0.10",
+    "sodium-universal": "^2.0.0",
+    "through2": "^2.0.0",
+    "webrtc-swarm": "^2.9.0",
+    "websocket-stream": "^5.1.2",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
     "browserify": "^14.1.0",
+    "concat-stream": "^2.0.0",
     "tape": "^4.6.3",
     "uglifyjs": "^2.4.10",
     "zuul": "^3.11.1"

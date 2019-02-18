@@ -1,81 +1,200 @@
-var inherits = require('util').inherits
-var pump = require('pump')
-var events = require('events')
-var swarm = require('webrtc-swarm')
-var Signalhub = require('signalhub')
-var hyperdrive = require('hyperdrive')
-var memdb = require('memdb')
+/* global self */
+const EventEmitter = require('events').EventEmitter
+const Signalhub = require('signalhubws')
+const hyperdrive = require('hyperdrive')
+const ram = require('random-access-memory')
+const websocket = require('websocket-stream')
+const WebrtcSwarm = require('webrtc-swarm')
+const pump = require('pump')
+const through = require('through2')
+const encoding = require('dat-encoding')
+const xtend = require('xtend')
 
-module.exports = Repo
+const DEFAULT_WEBSOCKET_RECONNECT = 1000
+const DEFAULT_WEBSOCKET_CONNECTION_DELAY = 1000
+const DEFAULT_WEBSOCKET_CONNECTION_DELAY_LONG = 5000
 
-/**
- * A dat repository is a hyperdrive with some default settings.
- * @param {string} key    The key
- * @param {Object} opts   Options to use in the archive instance
- */
-function Repo (key, opts) {
-  if (!(this instanceof Repo)) return new Repo(key, opts)
-  var self = this
-  events.EventEmitter.call(this)
-  this.opts = opts || {}
-  this.db = this.opts.db || memdb()
-  this.drive = hyperdrive(this.db)
-  this.archive = this.drive.createArchive(key, this.opts)
-  this.key = this.archive.key.toString('hex')
-  this.privateKey = this.archive.privateKey
-  var signalhub = Signalhub('dat-' + this.archive.key.toString('hex'), opts.signalhub || 'https://signalhub.mafintosh.com')
-  this.swarm = this.swarm || swarm(signalhub)
-  self.join()
-  this._open(key)
-}
+const DEFAULT_SIGNALHUBS = ['wss://signalhubws.mauve.moe']
 
-inherits(Repo, events.EventEmitter)
+// Check if the page was loaded from HTTPS
+const IS_SECURE = self.location.href.startsWith('https')
 
-Repo.prototype._open = function () {
-  var self = this
-  this.archive.open(function () {
-    self.emit('ready')
-  })
-}
+module.exports =
 
-/**
- * Joins the swarm for the given repo.
- * @param  {Repo}   repo
- */
-Repo.prototype.join =
-Repo.prototype.resume = function () {
-  this.swarm.on('peer', this._replicate.bind(this))
-}
+class Repo extends EventEmitter {
+  /**
+  * A dat repository is a hyperdrive with some default settings.
+  * @param {string} url    The url
+  * @param {Object} opts   Options to use in the archive instance
+  */
+  constructor (key, opts) {
+    if (!opts) throw new TypeError('Repo must have options passed in from `Dat` instance')
+    super()
 
-/**
- * Internal function for replicating the archive to the swarm
- * @param  {[type]} peer A webrtc-swarm peer
- */
-Repo.prototype._replicate = function (conn) {
-  var peer = this.archive.replicate({
-    upload: true,
-    download: true
-  })
-  pump(conn, peer, conn)
-}
+    this.url = null
+    this.opts = opts
+    this.db = this.opts.db || ram
+    this.archive = hyperdrive(this.db, key, xtend({
+      sparse: true
+    }, opts))
+    this.isReady = false
 
-/**
- * Leaves the swarm for the given repo.
- * @param  {Repo}   repo
- */
-Repo.prototype.leave =
-Repo.prototype.pause = function () {
-  this.swarm.removeListener('peer', this._replicate)
-}
+    this.signalhub = null
+    this.swarm = null
+    this.websocket = null
+    this._websocketTimer = null
 
-Repo.prototype.destroy =
-Repo.prototype.close = function () {
-  var self = this
-  self.swarm.close(function () {
-    self.archive.close(function () {
-      self.db.close(function () {
-        self.emit('close')
+    if (key) this.url = 'dat://' + encoding.encode(key)
+
+    this._open()
+  }
+
+  // Attempt to create a websocket connection to a gateway if possible
+  _createWebsocket () {
+    if (!this.opts.gateway) return
+    const servers = [].concat(this.opts.gateway)
+
+    if (!servers.length) return
+
+    const server = chooseRandom(servers)
+
+    const url = setSecure(server + '/' + this.archive.key.toString('hex'))
+
+    this.websocket = websocket(url)
+
+    this.websocket.once('error', () => {
+      setTimeout(() => {
+        this._createWebsocket(server)
+      }, DEFAULT_WEBSOCKET_RECONNECT)
+    })
+
+    this._replicate(this.websocket)
+  }
+
+  _startWebsocketTimer () {
+    // Wait a second before trying to establish a connection to the gateway in case there's already WebRTC peers
+    this._websocketTimer = setTimeout(() => {
+      this._createWebsocket()
+    }, DEFAULT_WEBSOCKET_CONNECTION_DELAY)
+  }
+
+  _joinWebrtcSwarm () {
+    const hubs = [].concat(this.opts.signalhub || DEFAULT_SIGNALHUBS).map(setSecure)
+
+    const appName = this.archive.discoveryKey.toString('hex').slice(40)
+
+    const signalhub = new Signalhub(appName, hubs)
+
+    this.signalhub = signalhub
+
+    // Listen for incoming connections
+    const subscription = signalhub.subscribe('all')
+    const processSubscription = through.obj((data, enc, cb) => {
+      if (data.from === swarm.me) {
+        return cb()
+      }
+      if (data.type === 'connect') {
+        // If we've gotten a connection request, delay websocket connection
+        // This is to prioritize WebRTC traffic and reduce gateway load
+        clearInterval(this._websocketTimer)
+        this._websocketTimer = setTimeout(() => {
+          this._createWebsocket()
+        }, DEFAULT_WEBSOCKET_CONNECTION_DELAY_LONG)
+        cb()
+        // We did the thing so no need to listen any further
+        subscription.destroy()
+      }
+    })
+
+    subscription.pipe(processSubscription)
+
+    const swarm = new WebrtcSwarm(signalhub)
+
+    this.swarm = swarm
+
+    swarm.on('peer', (stream) => this._replicate(stream))
+  }
+
+  _replicate (stream) {
+    pump(stream, this.archive.replicate({
+      sparse: true,
+      live: true
+    }), stream)
+  }
+
+  _open () {
+    this.archive.ready(() => {
+      // If no URL was provided, we should set it once the archive is ready
+      if (!this.url) {
+        const url = 'dat://' + encoding.encode(this.archive.key)
+        this.url = url
+      }
+      this._joinWebrtcSwarm()
+      this._startWebsocketTimer()
+      this.isReady = true
+      this.emit('ready')
+    })
+  }
+
+  ready (cb) {
+    if (this.isReady) {
+      process.nextTick(cb)
+    }
+    this.once('ready', cb)
+  }
+
+  close (cb) {
+    if (this.destroyed) {
+      if (cb) process.nextTick(cb)
+      return
+    }
+    this.destroyed = true
+    if (cb) this.once('close', cb)
+
+    // Close the gateway socket if one exists
+    if (this.websocket) {
+      this.websocket.end()
+      this.websocket = null
+    }
+
+    // Disconnect from the signalhub
+    this.signalhub.close(() => {
+      // Disconnect from WebRTC peers
+      this.swarm.close(() => {
+        // Close the DB files being used by hyperdrive
+        this.archive.close(() => {
+          this.emit('close')
+        })
       })
     })
-  })
+  }
+
+  destroy (cb) {
+    this.close(cb)
+  }
+}
+
+// Convert URLs to be HTTPS or not based on whether the page is
+function setSecure (url) {
+  if (IS_SECURE) {
+    if (url.startsWith('http:')) {
+      return 'https:' + url.slice(6)
+    } else if (url.startsWith('ws:')) {
+      return 'wss:' + url.slice(3)
+    } else {
+      return url
+    }
+  } else {
+    if (url.startsWith('https:')) {
+      return 'http:' + url.slice(7)
+    } else if (url.startsWith('wss:')) {
+      return 'ws:' + url.slice(4)
+    } else {
+      return url
+    }
+  }
+}
+
+function chooseRandom (list) {
+  return list[Math.floor(Math.random() * list.length)]
 }

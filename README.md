@@ -21,14 +21,12 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 ```js
 var Dat = require('dat-js')
-var concat = require('concat-stream')
 
-var dat = Dat()
-dat.add('ARCHIVE_KEY', function (repo) {
-  var readStream = repo.archive.createFileReadStream('hello.txt')
-  concat(readStream, function (data) {
-    console.log(data)
-  })
+var dat = new Dat()
+var repo = dat.get('dat://SOME_ARCHIVE_URL')
+
+var readStream = repo.archive.readFile('hello.txt', (err, data) {
+  console.log(data)
 })
 ```
 
@@ -37,23 +35,76 @@ dat.add('ARCHIVE_KEY', function (repo) {
 ```js
 var Dat = require('dat-js')
 
-var dat = Dat()
-dat.add(function (repo) {
-  console.log('dat key is:', repo.key)
-  var writer = repo.archive.createFileWriteStream('hello.txt')
-  writer.write('world')
-  writer.end(function () { replicate(repo.key) })
+var dat = new Dat()
+var repo = dat.create()
+
+// The URL will only be available after the `ready` event
+repo.ready(() => {
+  console.log('dat url is:', repo.url)
 })
 
-function replicate (key) {
-  var clone = Dat()
-  clone.add(key, function (repo) {
-    var readStream = repo.archive.createFileReadStream('hello.txt')
-    readStream.on('data', function (data) {
-      console.log(data.toString()) // prints 'world'
-    })
+// You can start reading/writing before it's `ready`
+var writer = repo.archive.createWriteStream('hello.txt')
+
+writer.write('world')
+writer.end(function () { replicate(repo.url) })
+
+function replicate (url) {
+  var clone = new Dat()
+  var repo = clone.get(url)
+
+  var readStream = repo.archive.createReadStream('hello.txt')
+  readStream.on('data', function (data) {
+    console.log(data.toString()) // prints 'world'
   })
 }
+```
+
+#### Replication with a websocket gateway
+
+```js
+var Dat = require('dat-js')
+var concat = require('concat-stream')
+var pump = require('pump')
+
+var dat = new Dat({
+  gateway: 'ws://gateway.mauve.moe:3000'
+})
+var repo = dat.get('dat://SOME_ARCHIVE_URL')
+
+var readStream = repo.archive.createReadStream('hello.txt')
+
+pump(readStream, concat(function (data) {
+  console.log(data)
+}))
+```
+
+#### Persisting a created dat and loading it from storage
+
+```js
+var Dat = require('dat-js')
+var db = require('random-access-idb')('dats')
+
+var dat = new Dat()
+
+var repo = dat.create({
+  db: db
+})
+
+repo.archive.writeFile('/example.txt', 'Hello World!', () => {
+  // Save it for later
+  localStorage.setItem('My_Repo', repo.url)
+})
+
+// Next time your app loads
+
+var repo = dat.get(localStorage.getItem('My_Repo'), {
+  db: db
+})
+
+repo.archive.readFile('/example.txt', 'utf-8', (err, data) => {
+  console.log(`It's still there: ${data}`)
+})
 ```
 
 ## API
@@ -62,13 +113,26 @@ function replicate (key) {
 
 Creates a new dat object. The options passed here will be default for any dats created using the `add` method.
 
- * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats.
+ * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats. In addition it has the following:
+  * `signalhub`: An optional string or array of strings for [signalhubws](https://github.com/soyuka/signalhubws) servers to use for WebRTC. Note that this isn't compatible with older `signalhub` servers. These servers are used to discover and connect to WebRTC peers.
+  * `gateway`: An optional string or array of strings for [dat-gateway](https://github.com/garbados/dat-gateway/) instances for websocket replication. This is used to proxy data from the rest of the dat network when there are no WebRTC peers available with your data.
 
-#### `dat.add(key, [options], [onrepo])`
+### `dat.get(url, [options])`
 
-Adds a new dat with the given key. Joins the appropriate swarm for that key and begins to upload and download data. The `onrepo` function will be called when the dat is finished being created.
+Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data. If the dat was already added, it will return the existing instance.
 
+ * `url`: Either a `dat://` url or just the public key in string form.
  * `options`: These options will override any options given in the Dat constructor.
+
+### `dat.create([options])`
+
+Creates a new dat, wait for it to be `ready` before trying to access the url.
+
+* `options`: These options will override any options given in the Dat constructor.
+
+### `dat.has(url)`
+
+Returns whether a given url has been loaded already.
 
 ### Properties
 
@@ -80,9 +144,13 @@ Array of repo instances
 
 The repo object managed by dat.
 
-#### `repo.key`
+#### `repo.url`
 
-The key of the repo
+The `dat://` url of the repo. Note that for newly created repos, you must wait for it to be `ready`.
+
+### `rep.ready(cb)`
+
+Invokes the `cb` once the repo is fully initialized. You can do reads and writes from the archive before then, but this is important if you're creating a new archive. If the repo is already `ready`, it will invoke `cb` on the next tick.
 
 #### `repo.destroy()`
 
