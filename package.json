@@ -35,7 +35,7 @@
     "browserify": "^14.1.0",
     "concat-stream": "^2.0.0",
     "tape": "^4.6.3",
-    "uglifyjs": "^2.4.10",
+    "uglify-es": "^3.3.9",
     "zuul": "^3.11.1"
   },
   "keywords": [
