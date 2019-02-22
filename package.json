@@ -1,6 +1,6 @@
 {
   "name": "dat-js",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "A pure javascript dat api",
   "main": "index.js",
   "scripts": {
