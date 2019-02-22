@@ -9,10 +9,12 @@ const pump = require('pump')
 const through = require('through2')
 const encoding = require('dat-encoding')
 const xtend = require('xtend')
+const crypto = require('hypercore-crypto')
 
 const DEFAULT_WEBSOCKET_RECONNECT = 1000
 const DEFAULT_WEBSOCKET_CONNECTION_DELAY = 1000
 const DEFAULT_WEBSOCKET_CONNECTION_DELAY_LONG = 5000
+const DAT_PROTOCOL = 'dat://'
 
 const DEFAULT_SIGNALHUBS = ['wss://signalhubws.mauve.moe']
 
@@ -31,9 +33,19 @@ class Repo extends EventEmitter {
     if (!opts) throw new TypeError('Repo must have options passed in from `Dat` instance')
     super()
 
-    this.url = null
+    // If no key was provided, generate one
+    if(!key) {
+      const keyPair = crypto.keyPair()
+      key = keyPair.publicKey
+      opts.secretKey = keyPair.secretKey
+    }
+
+    this.url = DAT_PROTOCOL + encoding.encode(key)
     this.opts = opts
-    this.db = this.opts.db || ram
+    this.db = (file) => {
+      const db = this.opts.db || ram
+      return db(this.url.slice(DAT_PROTOCOL.length) + '/' + file)
+    }
     this.archive = hyperdrive(this.db, key, xtend({
       sparse: true
     }, opts))
@@ -43,8 +55,6 @@ class Repo extends EventEmitter {
     this.swarm = null
     this.websocket = null
     this._websocketTimer = null
-
-    if (key) this.url = 'dat://' + encoding.encode(key)
 
     this._open()
   }
@@ -124,11 +134,6 @@ class Repo extends EventEmitter {
 
   _open () {
     this.archive.ready(() => {
-      // If no URL was provided, we should set it once the archive is ready
-      if (!this.url) {
-        const url = 'dat://' + encoding.encode(this.archive.key)
-        this.url = url
-      }
       this._joinWebrtcSwarm()
       this._startWebsocketTimer()
       this.isReady = true
