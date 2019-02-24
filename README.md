@@ -21,7 +21,7 @@ var Dat = require('dat-js')
 var dat = new Dat()
 var repo = dat.get('dat://SOME_ARCHIVE_URL')
 
-var readStream = repo.archive.readFile('hello.txt', (err, data) {
+var readStream = repo.archive.readFile('hello.txt', function (err, data) {
   console.log(data)
 })
 ```
