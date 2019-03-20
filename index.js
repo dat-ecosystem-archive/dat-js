@@ -1,17 +1,20 @@
-const xtend = require('xtend')
 const EventEmitter = require('events').EventEmitter
-const sodium = require('sodium-universal')
-const bufferAlloc = require('buffer-alloc-unsafe')
 const parallel = require('run-parallel')
 const encoding = require('dat-encoding')
+const RAW = require('random-access-web')
+const RAM = require('random-access-memory')
+const DiscoverySwarmWeb = require('discovery-swarm-web')
+const crypto = require('hypercore-crypto')
+const hypercoreProtocol = require('hypercore-protocol')
+const hyperdrive = require('hyperdrive')
 
-const Repo = require('./repo')
+const DAT_PROTOCOL = 'dat://'
 
 module.exports =
 
 /**
- * The Dat object. Manages multiple repositories in
- * a single discovery-swarm instance.
+ * The Dat object. Manages multiple archives in
+ * a single discovery-swarm-web instance.
  * @param {Object} opts   Default options to use for the dat.
  */
 class Dat extends EventEmitter {
@@ -19,39 +22,61 @@ class Dat extends EventEmitter {
     super()
     this.opts = opts || {}
 
-    if (!this.opts.id) this.opts.id = randomBytes(32)
+    if (!this.opts.id) this.opts.id = crypto.randomBytes(32)
 
-    this.repos = []
+    this.archives = []
+    this.swarm = new DiscoverySwarmWeb(Object.assign({
+      stream: (info) => this._replicate(info)
+    }, opts))
   }
 
   /**
-   * Returns a repo with the given url. Returns undefined
-   * if no repository is found with that url.
-   * @param  {url} url      The url of the repo.
-   * @return {Repo|undefined}  The repo object with the corresponding url.
+   * Returns a archive with the given url.
+   * @param  {url} url      The url of the archive.
+   * @return {hyperdrive}  The archive object with the corresponding url.
    */
   get (url, opts) {
-    const repo = this.repos.find((repo) => repo.url === url)
-    if (repo) return repo
+    const archive = this.archives.find((archive) => archive.url === url)
+    if (archive) return archive
     return this._add(url, opts)
   }
 
   _add (url, opts) {
     if (this.destroyed) throw new Error('client is destroyed')
     if (!opts) opts = {}
+    const finalOpts = Object.assign({}, this.opts, opts)
 
     let key = null
 
     if (url) key = encoding.decode(url)
 
-    const repo = new Repo(key, xtend(this.opts, opts))
-    this.repos.push(repo)
+    // If no key was provided, generate one
+    if (!key) {
+      const keyPair = crypto.keyPair()
+      key = keyPair.publicKey
+      finalOpts.secretKey = keyPair.secretKey
+    }
 
-    repo.ready(() => {
-      this.emit('repo', repo)
+    const keyString = encoding.encode(key)
+
+    const rawStorage = finalOpts.db || (finalOpts.persist ? RAW : RAM)
+    const storage = (file) => {
+      return rawStorage(keyString + '/' + file)
+    }
+    const archive = hyperdrive(storage, key, Object.assign({
+      sparse: true
+    }, finalOpts))
+
+    archive.url = DAT_PROTOCOL + keyString
+
+    this.archives.push(archive)
+
+    archive.ready(() => {
+      this.swarm.join(archive.discoveryKey)
+      this.emit('archive', archive)
     })
 
-    return repo
+    return archive
   }
 
   create (opts) {
@@ -59,11 +84,47 @@ class Dat extends EventEmitter {
   }
 
   has (url) {
-    return !!this.repos.find((repo) => repo.url === url)
+    return !!this.archives.find((archive) => archive.url === url)
+  }
+
+  _replicate (info) {
+    var stream = hypercoreProtocol({
+      id: this.opts.id,
+      live: true,
+      encrypt: true,
+      extensions: ['ephemeral', 'session-data']
+    })
+
+    stream.on('feed', (discoveryKey) => this._replicateFeed(stream, discoveryKey))
+
+    stream.on('error', (e) => {
+      this.emit('replication-error', e)
+    })
+
+    if (info.channel) {
+      this._replicateFeed(stream, info.channel)
+    }
+
+    return stream
+  }
+
+  _replicateFeed (stream, discoveryKey) {
+    if (this.destroyed) {
+      stream.end()
+      return
+    }
+    const stringKey = encoding.encode(discoveryKey)
+    const archive = this.archives.find((archive) => {
+      return encoding.encode(archive.discoveryKey) === stringKey
+    })
+
+    if (!archive) return
+
+    archive.replicate({ stream, live: true })
   }
 
   /**
-   * Closes the dat, the swarm, and all underlying repo instances.
+   * Closes the the swarm, and all underlying hyperdrive instances.
    */
   close (cb) {
     if (this.destroyed) {
@@ -71,15 +132,16 @@ class Dat extends EventEmitter {
       return
     }
     this.destroyed = true
+    this.swarm.close()
 
     if (cb) this.once('close', cb)
 
-    parallel(this.repos.map((repo) => {
+    parallel(this.archives.map((archive) => {
       return (cb) => {
-        repo.close(cb)
+        archive.close(cb)
       }
     }), () => {
-      this.repos = []
+      this.archives = null
       this.emit('close')
     })
   }
@@ -87,11 +149,4 @@ class Dat extends EventEmitter {
   destroy (cb) {
     this.close(cb)
   }
-}
-
-// Based on code from hypercore-protocol https://github.com/mafintosh/hypercore-protocol/blob/master/index.js#L502
-function randomBytes (n) {
-  const buf = bufferAlloc(n)
-  sodium.randombytes_buf(buf)
-  return buf
 }
