@@ -9,6 +9,8 @@ const hypercoreProtocol = require('hypercore-protocol')
 const hyperdrive = require('hyperdrive')
 
 const DAT_PROTOCOL = 'dat://'
+const STORAGE_NAME = 'dats'
+const STORAGE_COLLECTION_NAME = `files`
 
 module.exports =
 
@@ -25,9 +27,17 @@ class Dat extends EventEmitter {
     if (!this.opts.id) this.opts.id = crypto.randomBytes(32)
 
     this.archives = []
-    this.swarm = new DiscoverySwarmWeb(Object.assign({
+
+    const discoveryOpts = Object.assign({
       stream: (info) => this._replicate(info)
-    }, opts))
+    }, this.opts)
+    this.swarm = new DiscoverySwarmWeb(discoveryOpts)
+
+    const storageOpts = Object.assign({
+      name: STORAGE_NAME,
+      storeName: STORAGE_COLLECTION_NAME
+    }, this.opts)
+    this.persistence = RAW(storageOpts)
   }
 
   /**
@@ -59,7 +69,7 @@ class Dat extends EventEmitter {
 
     const keyString = encoding.encode(key)
 
-    const rawStorage = finalOpts.db || (finalOpts.persist ? RAW : RAM)
+    const rawStorage = finalOpts.db || (finalOpts.persist ? this.persistence : RAM)
     const storage = (file) => {
       return rawStorage(keyString + '/' + file)
     }

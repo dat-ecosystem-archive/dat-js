@@ -25,12 +25,13 @@
     "hypercore-protocol": "^6.9.0",
     "hyperdrive": "^9.4.7",
     "random-access-memory": "^2.4.0",
-    "random-access-web": "^1.1.0",
+    "random-access-web": "github:random-access-storage/random-access-web",
     "run-parallel": "^1.1.9"
   },
   "devDependencies": {
     "browserify": "^14.1.0",
     "concat-stream": "^2.0.0",
+    "pump": "^3.0.0",
     "tape": "^4.6.3",
     "uglifyjs": "^2.4.10",
     "zuul": "^3.11.1"

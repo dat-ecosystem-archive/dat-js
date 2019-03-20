@@ -40,6 +40,35 @@ test('create a dat in memory', function (t) {
   })
 })
 
+test('create using persistence', function (t) {
+  t.plan(3)
+  var dat1 = new Dat()
+
+  var archive1 = dat1.create({
+    persist: true
+  })
+
+  archive1.writeFile('/example.txt', 'Hello World!', (err) => {
+    t.notOk(err, 'Saved to persistant storage')
+    const url = archive1.url
+    dat1.close(() => {
+      var dat2 = new Dat({
+        persist: true
+      })
+
+      var archive2 = dat2.get(url)
+
+      archive2.readFile('/example.txt', 'utf-8', (err, data) => {
+        t.notOk(err, 'Read file successfully')
+        t.equals(data, 'Hello World!', 'got proper data from archive')
+        dat2.close(() => {
+          t.end()
+        })
+      })
+    })
+  })
+})
+
 test('replicate a dat using WebRTC', function (t) {
   var dat1 = new Dat()
   var dat2 = new Dat()
