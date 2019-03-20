@@ -30,10 +30,10 @@ class Dat extends EventEmitter {
    * @param  {url} url      The url of the repo.
    * @return {Repo|undefined}  The repo object with the corresponding url.
    */
-  get (url) {
+  get (url, opts) {
     const repo = this.repos.find((repo) => repo.url === url)
     if (repo) return repo
-    return this._add(url)
+    return this._add(url, opts)
   }
 
   _add (url, opts) {
