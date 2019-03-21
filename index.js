@@ -102,7 +102,6 @@ class Dat extends EventEmitter {
       id: this.opts.id,
       live: true,
       encrypt: true,
-      extensions: ['ephemeral', 'session-data']
     })
 
     stream.on('feed', (discoveryKey) => this._replicateFeed(stream, discoveryKey))

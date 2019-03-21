@@ -61,6 +61,7 @@ var Dat = require('dat-js')
 var dat = new Dat()
 
 var archive = dat.create({
+  // Set this flag so that the data is persisted to the browser rather than memory
   persist: true
 })
 
@@ -88,12 +89,12 @@ Creates a new dat object. The options passed here will be default for any dats c
 
  * `options`: any options you can pass to [mafintosh/hyperdrive](https://github.com/mafintosh/hyperdrive). These options will become default for all dats. It also gets passed as options into [discovery-swarm-web](https://github.com/RangerMauve/discovery-swarm-web). In addition it has the following:
   * `persist`: Whether the data should persist locally or load in memory. Default: `false` (memory only). This uses [random-access-web](https://github.com/RangerMauve/random-access-web) for persistence to choose the best storage layer for the current browser.
-  * `db`: Pass in the random-access-storage](https://github.com/random-access-storage/random-access-storage) instance to use. (overrides the `persist` option)
+  * `db`: Pass in the [random-access-storage](https://github.com/random-access-storage/random-access-storage) instance to use. (overrides the `persist` option)
   * `id`: The ID to use when replicating hyperdrives
 
 ### `dat.get(url, [options])`
 
-Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data. If the dat was already added, it will return the existing instance. One gotcha is that dat-js doesn't support DNS resolution yet. As such you'll need to use the actual archive key for loading websites. `dat-js` adds a `url` field to the archive, but you can see the rest of the APIs available in the [hyperdrive](https://www.npmjs.com/package/hyperdrive) docs.
+Adds a new dat with the given url. Joins the appropriate swarm for that url and begins to upload and download data. If the dat was already added, it will return the existing instance. One gotcha is that dat-js doesn't support DNS resolution yet. As such you'll need to use the actual archive key for loading websites. `dat-js` adds a `url` field to the archive, which contains the [read key](https://docs.datproject.org/docs/concepts#distributed-network), but you can see the rest of the APIs available in the [hyperdrive](https://www.npmjs.com/package/hyperdrive) docs.
 
  * `url`: Either a `dat://` url or just the public key in string form.
  * `options`: These options will override any options given in the Dat constructor.

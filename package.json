@@ -25,6 +25,7 @@
     "hypercore-protocol": "^6.9.0",
     "hyperdrive": "^9.4.7",
     "random-access-memory": "^2.4.0",
+    "random-access-web": "^2.0.1",
     "run-parallel": "^1.1.9"
   },
   "devDependencies": {
