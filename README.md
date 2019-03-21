@@ -15,6 +15,8 @@ Want to use Dat in the command line or an app (not build applications)? Check ou
 
 #### Getting data from a remote dat
 
+You can load a Dat archive using it's `read key`. Dat-js will reach out to the P2P network and start loading the metadata into memory. From there you can invoke [hyperdrive](https://www.npmjs.com/package/hyperdrive) methods to read the data.
+
 ```js
 var Dat = require('dat-js')
 
@@ -26,34 +28,9 @@ var readStream = archive.readFile('hello.txt', function (err, data) {
 })
 ```
 
-#### Replicating a dat in memory
-
-```js
-var Dat = require('dat-js')
-
-var dat = new Dat()
-var archive = dat.create()
-
-console.log('dat url is:', repo.url)
-
-// You can start reading/writing right away
-var writer = archive.createWriteStream('hello.txt')
-
-writer.write('world')
-writer.end(function () { replicate(archive.url) })
-
-function replicate (url) {
-  var clone = new Dat()
-  var repo = clone.get(url)
-
-  var readStream = archive.createReadStream('hello.txt')
-  readStream.on('data', function (data) {
-    console.log(data.toString()) // prints 'world'
-  })
-}
-```
-
 #### Persisting a created dat and loading it from storage
+
+By default, when you create a new Dat archive with Dat-js, it will be erased after you refresh the page. In order to keep it around for the next time the user loads the page, you need to make sure to enable the `persist` flag, and save a copy of the `url` read key to someplace like [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 
 ```js
 var Dat = require('dat-js')
@@ -101,7 +78,7 @@ Adds a new dat with the given url. Joins the appropriate swarm for that url and 
 
 ### `dat.create([options])`
 
-Creates a new dat, wait for it to be `ready` before trying to access the url.
+Creates a new dat, wait for it to be `ready` before trying to access the url. Make sure to save the repo `url` somewhere and enable `persist: true` so you can access it again later!
 
 * `options`: These options will override any options given in the Dat constructor.
 
