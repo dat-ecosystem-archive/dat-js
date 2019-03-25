@@ -46,9 +46,11 @@ class Dat extends EventEmitter {
    * @return {hyperdrive}  The archive object with the corresponding url.
    */
   get (url, opts) {
-    const archive = this.archives.find((archive) => archive.url === url)
+    const key = encoding.decode(url)
+    const normalizedURL = `dat://${encoding.encode(key)}`
+    const archive = this.archives.find((archive) => archive.url === normalizedURL)
     if (archive) return archive
-    return this._add(url, opts)
+    return this._add(normalizedURL, opts)
   }
 
   _add (url, opts) {
@@ -94,7 +96,9 @@ class Dat extends EventEmitter {
   }
 
   has (url) {
-    return !!this.archives.find((archive) => archive.url === url)
+    const key = encoding.decode(url)
+    const normalizedURL = `dat://${encoding.encode(key)}`
+    return !!this.archives.find((archive) => archive.url === normalizedURL)
   }
 
   _replicate (info) {
