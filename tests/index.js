@@ -7,29 +7,32 @@ var DAT_PROTOCOL = 'dat://'
 var DAT_KEY_STRING_LENGTH = 64
 var DAT_KEY_BYTE_LENGTH = 32
 var DAT_URL_LENGTH = DAT_PROTOCOL.length + DAT_KEY_STRING_LENGTH
-var GATEWAY_URL = 'wss://gateway.mauve.moe'
 
 test('create a dat in memory', function (t) {
-  t.plan(6)
+  t.plan(7)
   var dat = new Dat()
-  t.equals(dat.repos.length, 0, 'has zero repos before adding')
-  var repo = dat.create()
+  t.equals(dat.archives.length, 0, 'has zero archives before adding')
+  var archive = dat.create()
 
-  dat.on('repo', (repo) => {
-    t.ok(repo, 'emits the repo event')
-    t.equals(repo.url.length, DAT_URL_LENGTH, 'repo key is there')
+  dat.on('archive', (archive) => {
+    t.ok(archive, 'emits the archive event')
+    t.equals(archive.url.length, DAT_URL_LENGTH, 'archive key is there')
   })
 
-  t.equals(dat.repos.length, 1, 'has one repo after adding')
-  repo.ready(() => {
-    t.equals(repo.archive.key.length, DAT_KEY_BYTE_LENGTH, 'has key with proper length')
-    t.equals(repo.archive.key.toString('hex'), repo.url.slice(DAT_PROTOCOL.length), 'key is the archive key')
+  t.equals(dat.archives.length, 1, 'has one archive after adding')
+  archive.ready(() => {
+    t.equals(archive.key.length, DAT_KEY_BYTE_LENGTH, 'has key with proper length')
+    t.equals(archive.key.toString('hex'), archive.url.slice(DAT_PROTOCOL.length), 'key is the archive key')
 
-    repo.close()
+    archive.writeFile('/example.txt', 'Hello World!', (err) => {
+      t.notOk(err, 'Successfully wrote to archive')
 
-    repo.on('close', function () {
-      dat.close()
+      archive.close()
     })
+  })
+
+  archive.on('close', function () {
+    dat.close()
   })
 
   dat.on('close', () => {
@@ -37,23 +40,52 @@ test('create a dat in memory', function (t) {
   })
 })
 
+test('create using persistence', function (t) {
+  t.plan(3)
+  var dat1 = new Dat()
+
+  var archive1 = dat1.create({
+    persist: true
+  })
+
+  archive1.writeFile('/example.txt', 'Hello World!', (err) => {
+    t.notOk(err, 'Saved to persistant storage')
+    const url = archive1.url
+    dat1.close(() => {
+      var dat2 = new Dat({
+        persist: true
+      })
+
+      var archive2 = dat2.get(url)
+
+      archive2.readFile('/example.txt', 'utf-8', (err, data) => {
+        t.notOk(err, 'Read file successfully')
+        t.equals(data, 'Hello World!', 'got proper data from archive')
+        dat2.close(() => {
+          t.end()
+        })
+      })
+    })
+  })
+})
+
 test('replicate a dat using WebRTC', function (t) {
   var dat1 = new Dat()
   var dat2 = new Dat()
-  t.equals(dat1.repos.length, 0, 'has zero repos before adding')
-  t.equals(dat2.repos.length, 0, 'has zero repos before adding')
+  t.equals(dat1.archives.length, 0, 'has zero archives before adding')
+  t.equals(dat2.archives.length, 0, 'has zero archives before adding')
 
-  var repo1 = dat1.create()
+  var archive1 = dat1.create()
 
-  repo1.ready(() => {
-    repo1.archive.writeFile('/example.txt', 'Hello World!', (err) => {
+  archive1.ready(() => {
+    archive1.writeFile('/example.txt', 'Hello World!', (err) => {
       t.notOk(err, 'no error when writing')
 
-      var url = repo1.url
+      var url = archive1.url
 
-      var repo2 = dat2.get(url)
+      var archive2 = dat2.get(url)
 
-      repo2.archive.readFile('/example.txt', 'utf-8', (err, data) => {
+      archive2.readFile('/example.txt', 'utf-8', (err, data) => {
         t.notOk(err, 'no errors when reading')
 
         t.equals(data, 'Hello World!', 'got proper data from archive')
@@ -68,44 +100,40 @@ test('replicate a dat using WebRTC', function (t) {
   })
 })
 
-test('replicate a dat over websockets', function (t) {
+test('replicate an existing dat', function (t) {
   t.plan(4)
 
-  var dat = new Dat({
-    gateway: GATEWAY_URL
-  })
+  var dat = new Dat()
 
-  t.equals(dat.repos.length, 0, 'has zero repos before adding')
+  t.equals(dat.archives.length, 0, 'has zero archives before adding')
 
   // Load the dat project website through the WS gateway
   var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
-  var repo = dat.get(key)
+  var archive = dat.get(key)
 
-  repo.once('ready', () => {
-    t.equals(repo.archive.key.toString('hex'), key, 'has the correct key')
+  archive.ready(() => {
+    t.equals(archive.key.toString('hex'), key, 'has the correct key')
 
     // Load the about page
-    repo.archive.readFile('/about/index.html', 'utf-8', function (err, data) {
+    archive.readFile('/about/index.html', 'utf-8', function (err, data) {
       t.notOk(err, 'no error')
       t.ok(data, 'loaded data from archive')
       dat.close()
     })
   })
 
-  repo.once('close', () => {
+  archive.once('close', () => {
     t.end()
   })
 })
 
 test('use readStream without waiting for the ready event', function (t) {
-  var dat = new Dat({
-    gateway: GATEWAY_URL
-  })
+  var dat = new Dat()
 
   var key = '60c525b5589a5099aa3610a8ee550dcd454c3e118f7ac93b7d41b6b850272330'
-  var repo = dat.get(key)
+  var archive = dat.get(key)
 
-  var readStream = repo.archive.createReadStream('/about/index.html')
+  var readStream = archive.createReadStream('/about/index.html')
 
   readStream.once('error', function (e) {
     t.fail(e)
@@ -121,29 +149,29 @@ test('use readStream without waiting for the ready event', function (t) {
   })
 })
 
-test('replicate multiple repos over WebRTC', function (t) {
+test('replicate multiple archives over WebRTC', function (t) {
   var dat1 = new Dat()
   var dat2 = new Dat()
 
-  var repo11 = dat1.create()
-  var repo22 = dat2.create()
+  var archive11 = dat1.create()
+  var archive22 = dat2.create()
 
-  repo11.ready(function () {
-    repo11.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
-    repo22.ready(function () {
-      repo22.archive.writeFile('/example.txt', 'Hello World!', 'utf-8')
+  archive11.ready(function () {
+    archive11.writeFile('/example.txt', 'Hello World!', 'utf-8')
+    archive22.ready(function () {
+      archive22.writeFile('/example.txt', 'Hello World!', 'utf-8')
 
-      const repo12 = dat2.get(repo11.url)
-      const repo21 = dat1.get(repo22.url)
+      var archive12 = dat2.get(archive11.url)
+      var archive21 = dat1.get(archive22.url)
 
-      repo12.ready(function () {
-        repo21.ready(function () {
-          repo12.archive.readFile('/example.txt', function (err1, data1) {
-            t.notOk(err1, 'no error reading first repo')
-            t.ok(data1, 'got data from first repo')
-            repo21.archive.readFile('/example.txt', function (err2, data2) {
-              t.notOk(err2, 'no error reading second repo')
-              t.ok(data2, 'got data from second repo')
+      archive12.ready(function () {
+        archive21.ready(function () {
+          archive12.readFile('/example.txt', function (err1, data1) {
+            t.notOk(err1, 'no error reading first archive')
+            t.ok(data1, 'got data from first archive')
+            archive21.readFile('/example.txt', function (err2, data2) {
+              t.notOk(err2, 'no error reading second archive')
+              t.ok(data2, 'got data from second archive')
               dat1.close(function () {
                 dat2.close(function () {
                   t.end()

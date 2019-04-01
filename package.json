@@ -1,11 +1,12 @@
 {
   "name": "dat-js",
-  "version": "7.1.1",
+  "version": "8.0.0",
   "description": "A pure javascript dat api",
   "main": "index.js",
   "scripts": {
     "test-local": "zuul --local -- tests/index.js",
-    "build": "browserify -s Dat -e ./ | uglifyjs -c warnings=false -m > dat.min.js"
+    "build": "browserify -s Dat -e ./ | uglifyjs -c warnings=false -m > dat.min.js",
+    "build-tests": "browserify -s Dat -e ./tests/ > tests/bundle.js"
   },
   "repository": {
     "type": "git",
@@ -18,23 +19,19 @@
   },
   "homepage": "https://github.com/datproject/dat-js#readme",
   "dependencies": {
-    "buffer-alloc-unsafe": "^1.0.0",
     "dat-encoding": "^5.0.1",
+    "discovery-swarm-web": "^1.0.4",
     "hypercore-crypto": "^1.0.0",
+    "hypercore-protocol": "^6.9.0",
     "hyperdrive": "^9.4.7",
-    "pump": "^1.0.3",
     "random-access-memory": "^2.4.0",
-    "run-parallel": "^1.1.9",
-    "signalhubws": "^1.0.10",
-    "sodium-universal": "^2.0.0",
-    "through2": "^2.0.0",
-    "webrtc-swarm": "^2.9.0",
-    "websocket-stream": "^5.1.2",
-    "xtend": "^4.0.1"
+    "random-access-web": "^2.0.1",
+    "run-parallel": "^1.1.9"
   },
   "devDependencies": {
     "browserify": "^14.1.0",
     "concat-stream": "^2.0.0",
+    "pump": "^3.0.0",
     "tape": "^4.6.3",
     "uglifyjs": "^2.4.10",
     "zuul": "^3.11.1"
