@@ -23,9 +23,12 @@ var Dat = require('dat-js')
 var dat = new Dat()
 var archive = dat.get('dat://SOME_ARCHIVE_URL')
 
-var readStream = archive.readFile('hello.txt', function (err, data) {
+archive.readFile('hello.txt', function (err, data) {
   console.log(data)
 })
+
+var readStream = createReadStream('hello.txt')
+readStream.on('data', console.log)
 ```
 
 #### Persisting a created dat and loading it from storage
@@ -46,6 +49,11 @@ archive.writeFile('/example.txt', 'Hello World!', () => {
   // Save it for later
   localStorage.setItem('My_Repo', archive.url)
 })
+
+// OR as a stream:
+var ws = archive.createWriteStream()
+ws.write('Hello World!')
+ws.end()
 
 // Next time your app loads
 
