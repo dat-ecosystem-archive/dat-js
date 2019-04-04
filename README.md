@@ -27,7 +27,7 @@ archive.readFile('hello.txt', function (err, data) {
   console.log(data)
 })
 
-var readStream = createReadStream('hello.txt')
+var readStream = archive.createReadStream('hello.txt')
 readStream.on('data', console.log)
 ```
 
