@@ -61,7 +61,7 @@ var repo = dat.get(localStorage.getItem('My_Repo'), {
   persist: true
 })
 
-repo.archive.readFile('/example.txt', 'utf-8', (err, data) => {
+repo.readFile('/example.txt', 'utf-8', (err, data) => {
   console.log(`It's still there: ${data}`)
 })
 ```
