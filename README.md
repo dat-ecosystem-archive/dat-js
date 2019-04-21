@@ -55,6 +55,9 @@ var ws = archive.createWriteStream()
 ws.write('Hello World!')
 ws.end()
 
+// Now, allow the Dat network to see this new data, example.txt
+archive.replicate()
+
 // Next time your app loads
 
 var repo = dat.get(localStorage.getItem('My_Repo'), {
