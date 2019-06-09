@@ -25,15 +25,18 @@
     "hypercore-protocol": "^6.9.0",
     "hyperdrive": "^9.4.7",
     "random-access-memory": "^2.4.0",
-    "random-access-web": "^2.0.1",
+    "random-access-web": "^2.0.2",
     "run-parallel": "^1.1.9"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "babelify": "^10.0.0",
     "browserify": "^14.1.0",
     "concat-stream": "^2.0.0",
     "pump": "^3.0.0",
     "tape": "^4.6.3",
-    "uglifyjs": "^2.4.10",
+    "uglify-es": "^3.3.9",
     "zuul": "^3.11.1"
   },
   "keywords": [
