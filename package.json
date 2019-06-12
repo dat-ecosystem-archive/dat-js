@@ -20,7 +20,7 @@
   "homepage": "https://github.com/datproject/dat-js#readme",
   "dependencies": {
     "dat-encoding": "^5.0.1",
-    "discovery-swarm-web": "^1.0.4",
+    "discovery-swarm-web": "^1.4.0",
     "hypercore-crypto": "^1.0.0",
     "hypercore-protocol": "^6.9.0",
     "hyperdrive": "^9.4.7",

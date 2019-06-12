@@ -31,7 +31,7 @@ class Dat extends EventEmitter {
     const discoveryOpts = Object.assign({
       stream: (info) => this._replicate(info)
     }, this.opts)
-    this.swarm = new DiscoverySwarmWeb(discoveryOpts)
+    this.swarm = DiscoverySwarmWeb(discoveryOpts)
 
     const storageOpts = Object.assign({
       name: STORAGE_NAME,
