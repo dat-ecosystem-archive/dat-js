@@ -1,3 +1,5 @@
+**This module is being superceded by the [Dat SDK](https://github.com/datproject/sdk) which works in Node and the Web**
+
 # dat-js [![Travis](https://api.travis-ci.org/datproject/dat-js.svg)](https://travis-ci.org/datproject/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
 
 A pure JavaScript browser-friendly api for using dat.
