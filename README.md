@@ -1,4 +1,8 @@
-**This module is being superceded by the [Dat SDK](https://github.com/datproject/sdk) which works in Node and the Web**
+[![deprecated](http://badges.github.io/stability-badges/dist/deprecated.svg)](https://github.com/datproject/sdk) See [hyper SDK](https://github.com/datproject/sdk) for similar functionality. 
+
+More info on active projects and modules at [dat-ecosystem.org](https://dat-ecosystem.org/) <img src="https://i.imgur.com/qZWlO1y.jpg" width="30" height="30" /> 
+
+---
 
 # dat-js [![Travis](https://api.travis-ci.org/datproject/dat-js.svg)](https://travis-ci.org/datproject/dat-js)  [![NPM version](https://img.shields.io/npm/v/dat-js.svg?style=flat-square)](https://npmjs.org/package/dat)
 
